@@ -1,0 +1,13 @@
+Package: profmem
+Version: 0.0.0-9000
+Title: A Simple Memory Profiling API for R
+Imports:
+    utils
+Authors@R: c(person("Henrik", "Bengtsson", role=c("aut", "cre", "cph"),
+                                          email = "henrikb@braju.com"))
+Description: A simplified API for memory profiling in R built around utils::Rprofmem().
+License: LGPL (>= 2.1)
+LazyLoad: TRUE
+URL: https://github.com/HenrikBengtsson/profmem
+BugReports: https://github.com/HenrikBengtsson/profmem/issues
+RoxygenNote: 5.0.1
