@@ -49,7 +49,7 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
     trace <- gsub('" "', '", "', trace, fixed=TRUE)
     trace <- sprintf("c(%s)", trace)
     trace <- eval(parse(text=trace))
-    trace <- trace[seq_len(length(trace)-ndrop)]
+    trace <- trace[seq_len(max(0L, length(trace)-ndrop))]
 
     list(bytes=bytes, trace=trace)
   })
