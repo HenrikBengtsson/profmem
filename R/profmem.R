@@ -19,19 +19,25 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
 
   ## Record size of call stack this far
   ncalls <- length(sys.calls())
-  ndrop <- ncalls + 2L
+  ndrop <- ncalls + 6L
 
-  ## Memory profile
-  Rprofmem(filename=pathname, append=FALSE, threshold=0)
-  eval(expr, envir=envir)
-  Rprofmem("")
+  ## Profile memory
+  error <- NULL
+  value <- tryCatch({
+    Rprofmem(filename=pathname, append=FALSE, threshold=0)
+    eval(expr, envir=envir)
+  }, error = function(ex) {
+    error <<- ex
+    NULL
+  }, finally = {
+    Rprofmem("")
+  })
 
   ## Load results
-  bfr0 <- readLines(pathname, warn=FALSE)
+  bfr <- readLines(pathname, warn=FALSE)
 
   ## WORKAROUND: Add newlines for entries with empty call stacks
   ## https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25
-  bfr <- bfr0
   pattern <- "^([0-9]+) :([0-9]+) :"
   while(any(grepl(pattern, bfr))) {
     bfr <- gsub(pattern, "\\1 :\n\\2 :", bfr)
@@ -49,23 +55,44 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
     trace <- gsub('" "', '", "', trace, fixed=TRUE)
     trace <- sprintf("c(%s)", trace)
     trace <- eval(parse(text=trace))
-    trace <- trace[seq_len(length(trace)-ndrop)]
+    trace <- trace[seq_len(max(0L, length(trace)-ndrop))]
 
     list(bytes=bytes, trace=trace)
   })
 
   attr(bfr, "expression") <- expr
+  attr(bfr, "value") <- value
+  attr(bfr, "error") <- error
   class(bfr) <- c("Rprofmem", class(bfr))
 
   bfr
 } ## profmem()
+
+
+#' Total number of bytes allocated
+#'
+#' @param x An Rprofmem object.
+#' @param ... Not used.
+#'
+#' @return A non-negative numeric.
+#'
+#' @aliases total.Rprofmem
+#' @export
+total <- function(x, ...) UseMethod("total")
+
+#' @export
+total.Rprofmem <- function(x, ...) {
+  bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
+  sum(bytes, na.rm=TRUE)
+}
 
 #' @export
 as.data.frame.Rprofmem <- function(x, ...) {
   bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
   traces <- unlist(lapply(x, FUN=function(x) {
     trace <- rev(x$trace)
-    trace <- sprintf("%s()", trace)
+    hasName <- !grepl("^<[^>]*>$", trace)
+    trace[hasName] <- sprintf("%s()", trace[hasName])
     paste(trace, collapse=" -> ")
   }))
   data.frame(bytes=bytes, calls=traces, stringsAsFactors=FALSE)

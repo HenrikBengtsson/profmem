@@ -2,5 +2,7 @@
 
 S3method(as.data.frame,Rprofmem)
 S3method(print,Rprofmem)
+S3method(total,Rprofmem)
 export(profmem)
+export(total)
 importFrom(utils,Rprofmem)
