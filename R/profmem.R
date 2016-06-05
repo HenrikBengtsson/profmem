@@ -22,16 +22,18 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
   ndrop <- ncalls + 2L
 
   ## Memory profile
+  close <- TRUE
   Rprofmem(filename=pathname, append=FALSE, threshold=0)
+  on.exit(if (close) Rprofmem(""), add=TRUE)
   eval(expr, envir=envir)
   Rprofmem("")
+  close <- FALSE
 
   ## Load results
-  bfr0 <- readLines(pathname, warn=FALSE)
+  bfr <- readLines(pathname, warn=FALSE)
 
   ## WORKAROUND: Add newlines for entries with empty call stacks
   ## https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25
-  bfr <- bfr0
   pattern <- "^([0-9]+) :([0-9]+) :"
   while(any(grepl(pattern, bfr))) {
     bfr <- gsub(pattern, "\\1 :\n\\2 :", bfr)
