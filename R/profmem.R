@@ -60,6 +60,24 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
   bfr
 } ## profmem()
 
+
+#' Total number of bytes allocated
+#'
+#' @param x An Rprofmem object.
+#' @param ... Not used.
+#'
+#' @return A non-negative numeric.
+#'
+#' @aliases total.Rprofmem
+#' @export
+total <- function(x, ...) UseMethod("total")
+
+#' @export
+total.Rprofmem <- function(x, ...) {
+  bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
+  sum(bytes, na.rm=TRUE)
+}
+
 #' @export
 as.data.frame.Rprofmem <- function(x, ...) {
   bytes <- unlist(lapply(x, FUN=function(x) x$bytes))

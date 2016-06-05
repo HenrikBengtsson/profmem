@@ -2,7 +2,7 @@ Package: profmem
 ================
 
 Version: 0.1.0-9000 [2016-06-05]
-o ...
+o Added total() to get the total number of bytes allocated.
 
 
 Version: 0.1.0 [2016-06-05]
