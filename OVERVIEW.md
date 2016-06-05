@@ -1,5 +1,6 @@
 <% R.utils::use("R.utils") %>
 
+<% if (capabilities('profmem')) { %>
 ## Example
 ```r
 <%=withCapture({
@@ -13,4 +14,6 @@ p <- profmem({
 p
 })%>
 ```
+
+<% } ## if (capabilities('profmem')) %>
 
