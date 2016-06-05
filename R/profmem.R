@@ -85,7 +85,8 @@ as.data.frame.Rprofmem <- function(x, ...) {
   bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
   traces <- unlist(lapply(x, FUN=function(x) {
     trace <- rev(x$trace)
-    trace <- sprintf("%s()", trace)
+    hasName <- !grepl("^<[^>]*>$", trace)
+    trace[hasName] <- sprintf("%s()", trace[hasName])
     paste(trace, collapse=" -> ")
   }))
   data.frame(bytes=bytes, calls=traces, stringsAsFactors=FALSE)
