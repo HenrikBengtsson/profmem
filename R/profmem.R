@@ -14,6 +14,16 @@
 profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
   if (substitute) expr <- substitute(expr)
 
+  ## Is memory profiling supported?
+  if (!capabilities("profmem")) {
+    msg <- "Profiling of memory allocations is not supported on this R system (capabilities('profmem') reports FALSE). See help('tracemem')."
+    if (.Platform$OS.type == "unix") {
+      msg <- paste(msg, "To enable memory profiling for R on Linux, R needs to be configured and built using './configure --enable-memory-profiling'.")
+    }
+    stop(msg)
+  }
+
+
   pathname <- tempfile(pattern="profmem", fileext="Rprofmem.out")
   on.exit(file.remove(pathname))
 
