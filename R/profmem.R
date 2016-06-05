@@ -19,15 +19,19 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
 
   ## Record size of call stack this far
   ncalls <- length(sys.calls())
-  ndrop <- ncalls + 2L
+  ndrop <- ncalls + 6L
 
-  ## Memory profile
-  close <- TRUE
-  Rprofmem(filename=pathname, append=FALSE, threshold=0)
-  on.exit(if (close) Rprofmem(""), add=TRUE)
-  eval(expr, envir=envir)
-  Rprofmem("")
-  close <- FALSE
+  ## Profile memory
+  error <- NULL
+  value <- tryCatch({
+    Rprofmem(filename=pathname, append=FALSE, threshold=0)
+    eval(expr, envir=envir)
+  }, error = function(ex) {
+    error <<- ex
+    NULL
+  }, finally = {
+    Rprofmem("")
+  })
 
   ## Load results
   bfr <- readLines(pathname, warn=FALSE)
@@ -57,6 +61,8 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
   })
 
   attr(bfr, "expression") <- expr
+  attr(bfr, "value") <- value
+  attr(bfr, "error") <- error
   class(bfr) <- c("Rprofmem", class(bfr))
 
   bfr
