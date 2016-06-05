@@ -1,15 +1,15 @@
 Package: profmem
 ================
 
-Version: 0.2.0-9000 [2016-06-06]
+Version: 0.2.0-9000 [2016-06-05]
 o Added readRprofmem().
 
 
-Version: 0.2.0 [2016-06-06]
+Version: 0.2.0 [2016-06-05]
 o Added total() to get the total number of bytes allocated.
 o profmem() returns also when evaluating the expression gives an error.
 
 
-Version: 0.1.0 [2016-06-05]
+Version: 0.1.0 [2016-06-04]
 o Added profmem().
 o Package created.
