@@ -1,4 +1,4 @@
-# profmem: A Simple Memory Profiling API for R
+# profmem: A Light-Weight Memory Profiling API for R
 
 
 ## Example
@@ -29,12 +29,20 @@ total  7368
 ```
 
 
+
 ## Installation
 R package profmem is only available via [GitHub](https://github.com/HenrikBengtsson/profmem) and can be installed in R as:
 ```r
 source('http://callr.org/install#HenrikBengtsson/profmem')
 ```
 
+### Pre-release version
+
+To install the pre-release version that is available in branch `develop`, use:
+```r
+source('http://callr.org/install#HenrikBengtsson/profmem@develop')
+```
+This will install the package from source.  
 
 
 
@@ -43,5 +51,5 @@ source('http://callr.org/install#HenrikBengtsson/profmem')
 | Resource:     | GitHub        | Travis CI     | Appveyor         |
 | ------------- | ------------------- | ------------- | ---------------- |
 | _Platforms:_  | _Multiple_          | _Linux_       | _Windows_        |
-| R CMD check   |  |  |  |
+| R CMD check   |  | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a> | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
 | Test coverage |                     |    |                  |
