@@ -48,8 +48,8 @@ This will install the package from source.
 
 ## Software status
 
-| Resource:     | GitHub        | Travis CI     | Appveyor         |
-| ------------- | ------------------- | ------------- | ---------------- |
-| _Platforms:_  | _Multiple_          | _Linux_       | _Windows_        |
-| R CMD check   |  | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a> | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
-| Test coverage |                     |    |                  |
+| Resource:     | GitHub        | Travis CI      | Appveyor         |
+| ------------- | ------------------- | -------------- | ---------------- |
+| _Platforms:_  | _Multiple_          | _Linux & OS X_ | _Windows_        |
+| R CMD check   |  | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>  | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
+| Test coverage |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>    |                  |
