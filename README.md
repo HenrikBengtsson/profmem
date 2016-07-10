@@ -24,8 +24,7 @@ Memory allocations:
 6       840 matrix() -> rnorm()
 7      2544 matrix() -> rnorm()
 8       840            matrix()
-9       312          <internal>
-total  7680                    
+total  7368                    
 
 ```
 
@@ -36,13 +35,6 @@ R package profmem is only available via [GitHub](https://github.com/HenrikBengts
 source('http://callr.org/install#HenrikBengtsson/profmem')
 ```
 
-### Pre-release version
-
-To install the pre-release version that is available in branch `develop`, use:
-```r
-source('http://callr.org/install#HenrikBengtsson/profmem@develop')
-```
-This will install the package from source.  
 
 
 
