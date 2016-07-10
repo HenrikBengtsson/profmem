@@ -14,12 +14,18 @@
 profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
   if (substitute) expr <- substitute(expr)
 
+  ## Is memory profiling supported?
+  if (!capabilities("profmem")) {
+    msg <- "Profiling of memory allocations is not supported on this R system (capabilities('profmem') reports FALSE). See help('tracemem')."
+    if (.Platform$OS.type == "unix") {
+      msg <- paste(msg, "To enable memory profiling for R on Linux, R needs to be configured and built using './configure --enable-memory-profiling'.")
+    }
+    stop(msg)
+  }
+
+
   pathname <- tempfile(pattern="profmem", fileext="Rprofmem.out")
   on.exit(file.remove(pathname))
-
-  ## Record size of call stack this far
-  ncalls <- length(sys.calls())
-  ndrop <- ncalls + 6L
 
   ## Profile memory
   error <- NULL
@@ -33,93 +39,14 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, ...) {
     Rprofmem("")
   })
 
-  ## Load results
-  bfr <- readLines(pathname, warn=FALSE)
+  ## Import log
+  drop <- length(sys.calls()) + 6L
+  bfr <-  readRprofmem(pathname, as="Rprofmem", drop=drop)
 
-  ## WORKAROUND: Add newlines for entries with empty call stacks
-  ## https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25
-  pattern <- "^([0-9]+) :([0-9]+) :"
-  while(any(grepl(pattern, bfr))) {
-    bfr <- gsub(pattern, "\\1 :\n\\2 :", bfr)
-    bfr <- unlist(strsplit(bfr, split="\n", fixed=TRUE))
-  }
-
-  ## Parse Rprofmem results
-  pattern <- "^([0-9]+ |new page):(.*)"
-  bfr <- lapply(bfr, FUN=function(x) {
-    bytes <- gsub(pattern, "\\1", x)
-    bytes[bytes == "new page"] <- ""  # Will become NA below w/out warning
-    bytes <- as.numeric(bytes)
-
-    trace <- gsub(pattern, "\\2", x)
-    trace <- gsub('" "', '", "', trace, fixed=TRUE)
-    trace <- sprintf("c(%s)", trace)
-    trace <- eval(parse(text=trace))
-    trace <- trace[seq_len(max(0L, length(trace)-ndrop))]
-
-    list(bytes=bytes, trace=trace)
-  })
-
+  ## Annotate
   attr(bfr, "expression") <- expr
   attr(bfr, "value") <- value
   attr(bfr, "error") <- error
-  class(bfr) <- c("Rprofmem", class(bfr))
 
   bfr
 } ## profmem()
-
-
-#' Total number of bytes allocated
-#'
-#' @param x An Rprofmem object.
-#' @param ... Not used.
-#'
-#' @return A non-negative numeric.
-#'
-#' @aliases total.Rprofmem
-#' @export
-total <- function(x, ...) UseMethod("total")
-
-#' @export
-total.Rprofmem <- function(x, ...) {
-  bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
-  sum(bytes, na.rm=TRUE)
-}
-
-#' @export
-as.data.frame.Rprofmem <- function(x, ...) {
-  bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
-  traces <- unlist(lapply(x, FUN=function(x) {
-    trace <- rev(x$trace)
-    hasName <- !grepl("^<[^>]*>$", trace)
-    trace[hasName] <- sprintf("%s()", trace[hasName])
-    paste(trace, collapse=" -> ")
-  }))
-  data.frame(bytes=bytes, calls=traces, stringsAsFactors=FALSE)
-} ## as.data.frame()
-
-
-#' @export
-print.Rprofmem <- function(x, ...) {
-  cat("Rprofmem memory profiling of:\n")
-  print(attr(x, "expression"))
-
-  cat("\nMemory allocations:\n")
-  data <- as.data.frame(x)
-  n <- nrow(data)
-  total <- sum(data$bytes, na.rm=TRUE)
-
-  ## Number of digits for indices
-  widx <- floor(log10(n)+1)
-
-  ## Number of digits for bytes
-  wbytes <- floor(log10(total)+1)
-
-  ## Report empty call stack as "internal"
-  data$calls[!nzchar(data$calls)] <- "<internal>"
-
-  data <- rbind(data, list(bytes=total, calls=""))
-  rownames(data)[n+1] <- "total"
-
-  print(data, ...)
-} ## print()
