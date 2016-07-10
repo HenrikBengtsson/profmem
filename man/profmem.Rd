@@ -22,7 +22,7 @@ An object of class \code{Rprofmem}.
 Memory profiles an R expression
 }
 \examples{
-if (capabilities('profmem')) {
+if (capabilities("profmem")) {
 
 p <- profmem({
   x <- raw(1000)
