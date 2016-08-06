@@ -1,5 +1,5 @@
 <%@meta language="R-vignette" content="--------------------------------
-%\VignetteIndexEntry{Simple Memory Profiling in R}
+%\VignetteIndexEntry{Simple Memory Profiling for R}
 %\VignetteAuthor{Henrik Bengtsson}
 %\VignetteKeyword{R}
 %\VignetteKeyword{package}

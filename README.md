@@ -1,4 +1,4 @@
-# profmem: A Light-Weight Memory Profiling API for R
+# profmem: Simple Memory Profiling for R
 
 ## Introduction
 
@@ -64,13 +64,6 @@ R package profmem is only available via [GitHub](https://github.com/HenrikBengts
 source('http://callr.org/install#HenrikBengtsson/profmem')
 ```
 
-### Pre-release version
-
-To install the pre-release version that is available in branch `develop`, use:
-```r
-source('http://callr.org/install#HenrikBengtsson/profmem@develop')
-```
-This will install the package from source.  
 
 
 
