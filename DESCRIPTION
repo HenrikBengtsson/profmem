@@ -1,6 +1,6 @@
 Package: profmem
-Version: 0.2.1-9000
-Title: A Light-Weight Memory Profiling API for R
+Version: 0.3.0
+Title: Simple Memory Profiling for R
 Imports:
     utils
 Suggests:
