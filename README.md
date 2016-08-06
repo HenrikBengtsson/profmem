@@ -31,8 +31,10 @@ total  7368
 
 
 
+## Allocations that are logged
+
 The `profmem()` function uses the `utils::Rprofmem()` function for logging memory allocation events to a temporary file.  The logged events are parsed and returned as an in-memory R object in a format that is convenient to work with.  All memory allocations that are done via the native `allocVector3()` part of R's native API are logged, which means that nearly all memory allocations are logged.  Any objects allocated this way are automatically deallocated by R's garbage collector at some point.  Garbage collection events are _not_ logged by `profmem()`.
-Allocations _not_ logged are those done by non-R native libraries or R packages that uses native code `Calloc() / Free()` for internal objects.  Such objects are _not_ handled by the R garbage collector.
+Allocations _not_ logged are those done by non-R native libraries or R packages that use native code `Calloc() / Free()` for internal objects.  Such objects are _not_ handled by the R garbage collector.
 
 
 ## Requirements
