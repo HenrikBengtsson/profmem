@@ -1,8 +1,12 @@
 Package: profmem
-Version: 0.2.1
-Title: A Light-Weight Memory Profiling API for R
+Version: 0.3.0
+Title: Simple Memory Profiling for R
 Imports:
     utils
+Suggests:
+    R.rsp,
+    markdown
+VignetteBuilder: R.rsp
 Authors@R: c(person("Henrik", "Bengtsson", role=c("aut", "cre", "cph"),
                                           email = "henrikb@braju.com"))
 Description: A simple and light-weight API for memory profiling in R built around utils::Rprofmem().

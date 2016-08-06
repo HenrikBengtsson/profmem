@@ -1,0 +1,72 @@
+<%@meta language="R-vignette" content="--------------------------------
+%\VignetteIndexEntry{Simple Memory Profiling for R}
+%\VignetteAuthor{Henrik Bengtsson}
+%\VignetteKeyword{R}
+%\VignetteKeyword{package}
+%\VignetteKeyword{vignette}
+%\VignetteKeyword{memory}
+%\VignetteKeyword{profiling}
+%\VignetteEngine{R.rsp::rsp}
+%\VignetteTangle{FALSE}
+--------------------------------------------------------------------"%>
+<%
+library("R.utils")
+options("withCapture/newline"=FALSE)
+options(mc.cores=2L)
+%>
+
+# Simple Memory Profiling in R
+
+## Introduction
+
+The `profmem()` function of the [profmem] package provides an easy way to profile the memory usage of an R expression.  It logs all memory allocations done within R (also by native code of R).  For example,
+
+<% if (capabilities('profmem')) { %>
+```r
+<%=withCapture({
+library("profmem")
+
+p <- profmem({
+  x <- raw(1000)
+  A <- matrix(rnorm(100), ncol=10)
+})
+
+p
+})%>
+```
+
+<% } else { %>
+
+**WARNING: This vignette was compiled with an R version that was built with memory profiling disabled, cf. `capabilities('profmem')`.  Please redo!**
+
+<% } ## if (capabilities('profmem')) %>
+
+
+## Allocations that are logged
+
+The `profmem()` function uses the `utils::Rprofmem()` function for logging memory allocation events to a temporary file.  The logged events are parsed and returned as an in-memory R object in a format that is convenient to work with.  All memory allocations that are done via the native `allocVector3()` part of R's native API are logged, which means that nearly all memory allocations are logged.  Any objects allocated this way are automatically deallocated by R's garbage collector at some point.  Garbage collection events are _not_ logged by `profmem()`.
+Allocations _not_ logged are those done by non-R native libraries or R packages that use native code `Calloc() / Free()` for internal objects.  Such objects are _not_ handled by the R garbage collector.
+
+
+## Requirements
+
+In order for `profmem()` to work, R must have been built with memory profiling enabled.  If not, `profmem()` will produce an error with an informative message.  To manually check whether an R binary was built with this enable or not, do:
+```r
+<%=withCapture({
+capabilities('profmem')
+})%>
+```
+
+To enable memory profiling (only if the above reports `FALSE`), R needs to be _configured_ and _built_ from source using:
+```sh
+$ ./configure --enable-memory-profiling
+$ make
+```
+For more information, please see the 'R Installation and Administration' documentation that comes with all R installations.
+
+
+
+[profmem]: https://github.com/HenrikBengtsson/profmem
+
+---
+Copyright Henrik Bengtsson, 2016

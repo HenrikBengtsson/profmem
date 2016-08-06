@@ -1,19 +1,14 @@
-<% R.utils::use("R.utils") %>
+<%
+## Reuse the future vignette
+md <- R.rsp::rstring(file="vignettes/profmem.md.rsp", postprocess=FALSE)
 
-<% if (capabilities('profmem')) { %>
-## Example
-```r
-<%=withCapture({
-library("profmem")
+## Drop the header
+md <- unlist(strsplit(md, split="\n", fixed=TRUE))
+md <- md[-seq_len(grep("^## ", md)[1]-1)]
 
-p <- profmem({
-  x <- raw(1000)
-  A <- matrix(rnorm(100), ncol=10)
-})
+## Drop the footer
+md <- md[seq_len(grep("^---", md)[1]-1)]
 
-p
-})%>
-```
-
-<% } ## if (capabilities('profmem')) %>
-
+## Output
+cat(md, sep="\n")
+%>
