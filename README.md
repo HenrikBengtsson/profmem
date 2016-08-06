@@ -1,9 +1,8 @@
 # profmem: A Light-Weight Memory Profiling API for R
 
+## Introduction
 
-The `profmem()` function of the [profmem] package provides an easy way to profile the memory usage of an R expression.  More precisely, it logs _all_ memory allocations done when creating new R objects.
-
-## Example
+The `profmem()` function of the [profmem] package provides an easy way to profile the memory usage of an R expression.  It logs all memory allocations done within R (also by native code of R).  For example,
 
 ```r
 > library("profmem")
@@ -28,10 +27,12 @@ Memory allocations:
 7      2544 matrix() -> rnorm()
 8       840            matrix()
 total  7368                    
-
 ```
 
 
+
+The `profmem()` function uses the `utils::Rprofmem()` function for logging memory allocation events to a temporary file.  The logged events are parsed and returned as an in-memory R object in a format that is convenient to work with.  All memory allocations that are done via the native `allocVector3()` part of R's native API are logged, which means that nearly all memory allocations are logged.  Any objects allocated this way are automatically deallocated by R's garbage collector at some point.  Garbage collection events are _not_ logged by `profmem()`.
+Allocations _not_ logged are those done by non-R native libraries or R packages that uses native code `Calloc() / Free()` for internal objects.  Such objects are _not_ handled by the R garbage collector.
 
 
 ## Requirements
@@ -41,20 +42,19 @@ In order for `profmem()` to work, R must have been built with memory profiling e
 > capabilities("profmem")
 profmem 
    TRUE 
-
 ```
 
-To enable memory profiling, R needs to be _configured_ and _built_ from source using:
+To enable memory profiling (only if the above reports `FALSE`), R needs to be _configured_ and _built_ from source using:
 ```sh
 $ ./configure --enable-memory-profiling
 $ make
 ```
+For more information, please see the 'R Installation and Administration' documentation that comes with all R installations.
 
 
-## What is logged?
-The `profmem()` function uses the `utils::Rprofmem()` function for logging memory allocation events to a temporary file.  The logged events are parsed and returned as an in-memory R object in a format that is convenient to work with.
 
-All memory allocations that are done via the native `allocVector3()` part of R's native API are logged.  This means that nearly all memory allocations are logged.  Allocations _not_ logged are those done by non-R native libraries or R packages that uses `Calloc() / Free()` for internal objects.
+[profmem]: https://github.com/HenrikBengtsson/profmem
+
 
 ## Installation
 R package profmem is only available via [GitHub](https://github.com/HenrikBengtsson/profmem) and can be installed in R as:
