@@ -32,6 +32,8 @@ p <- profmem({
 })
 
 p
+
+total(p)
 })%>
 ```
 
@@ -56,8 +58,13 @@ In order for `profmem()` to work, R must have been built with memory profiling e
 capabilities('profmem')
 })%>
 ```
+The overhead of running an R installation with memory profiling enabled compared to one without is neglectable / non-measurable.
 
-To enable memory profiling (only if the above reports `FALSE`), R needs to be _configured_ and _built_ from source using:
+Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, it has been confirmed that the R 3.3.1 binaries for Windows and the ones for the Debian Linux distribution have been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the macOS binaries, but this has to be confirmed.
+
+
+### Enabling memory profiling
+To enable memory profiling (only needed if `capabilities("profmem")` returns `FALSE`), R needs to be _configured_ and _built_ from source using:
 ```sh
 $ ./configure --enable-memory-profiling
 $ make

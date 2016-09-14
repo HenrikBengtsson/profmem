@@ -8,7 +8,7 @@
 total(x, ...)
 }
 \arguments{
-\item{x}{An Rprofmem object.}
+\item{x}{An \code{Rprofmem} object.}
 
 \item{...}{Not used.}
 }
@@ -18,4 +18,5 @@ A non-negative numeric.
 \description{
 Total number of bytes allocated
 }
+\keyword{internal}
 

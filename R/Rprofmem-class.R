@@ -1,12 +1,13 @@
 #' Total number of bytes allocated
 #'
-#' @param x An Rprofmem object.
+#' @param x An \code{Rprofmem} object.
 #' @param ... Not used.
 #'
 #' @return A non-negative numeric.
 #'
 #' @aliases total.Rprofmem
 #' @export
+#' @keywords internal
 total <- function(x, ...) UseMethod("total")
 
 #' @export
