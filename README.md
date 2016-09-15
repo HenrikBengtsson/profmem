@@ -22,15 +22,14 @@ Rprofmem memory profiling of:
 Memory allocations:
        bytes               calls
 1       4040           integer()
-2        312          <internal>
-3      80040 matrix() -> rnorm()
-4       2544 matrix() -> rnorm()
-5      80040            matrix()
-total 166976                    
+2      80040 matrix() -> rnorm()
+3       2544 matrix() -> rnorm()
+4      80040            matrix()
+total 166664                    
 ```
 From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
-We also see that `rnorm()`, which is called via `matrix()`, allocates 312 + 80040 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
-Finally, the last entry reflects the memory allocation of 2544 bytes done by `matrix()` itself.
+We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
+Finally, the last entry reflects the memory allocation of 80040 bytes done by `matrix()` itself.
 
 
 ## An example where memory profiling can make a difference
@@ -107,8 +106,8 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 > stats
 Unit: milliseconds
     expr   min    lq  mean median    uq   max neval
-  double 0.035 0.036 0.049  0.037 0.065 0.072   100
- integer 0.017 0.017 0.030  0.017 0.027 0.872   100
+  double 0.035 0.036 0.049  0.037 0.064 0.076   100
+ integer 0.017 0.017 0.030  0.017 0.027 0.859   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 

@@ -21,6 +21,12 @@ oopts <- options(
 )
 set.seed(0xBEEF) ## Just to minimize diff when rebuilt
 
+## WORKAROUND: Avoid spurious memory allocations that occurs
+## occassional when running in a fresh R session
+profmem <- profmem::profmem
+formals(profmem)$threshold <- 1000L
+
+
 ## WORKAROUND: withCapture() doesn't display suffix 'L' in integers
 ## in batch mode (https://github.com/HenrikBengtsson/profmem/issues/3)
 ## This function provides a manual way to reintroduce it
