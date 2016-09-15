@@ -31,6 +31,8 @@ matrix:
       r: oldrel
     - os: osx
       r: release
+      r_github_packages:
+      - jimhester/covr
       after_success:
       - Rscript -e 'covr::codecov(quiet=FALSE)'
       env: NB='w/ covr' ## Just a label
