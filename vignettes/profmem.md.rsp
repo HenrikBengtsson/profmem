@@ -6,29 +6,67 @@
 %\VignetteKeyword{vignette}
 %\VignetteKeyword{memory}
 %\VignetteKeyword{profiling}
+%\VignetteKeyword{garbage collection}
+%\VignetteKeyword{data type}
+%\VignetteKeyword{coercion}
 %\VignetteEngine{R.rsp::rsp}
 %\VignetteTangle{FALSE}
 --------------------------------------------------------------------"%>
 <%
 library("R.utils")
-options("withCapture/newline"=FALSE)
-options(mc.cores=2L)
-options(digits=2L)
+oopts <- options(
+  "withCapture/newline"=FALSE,
+  mc.cores=2L,
+  digits=2L
+)
+  
+## Avoid stray/random allocations that only occassionally occurs
+profmem <- profmem::profmem
+formals(profmem)$threshold <- 2000L
 %>
 
 # Simple Memory Profiling in R
 
 ## Introduction
 
-The `profmem()` function of the [profmem] package provides an easy way to profile the memory usage of an R expression.  It logs all memory allocations done within R (also by native code of R).  Profiling memory allocations is helpful when we, for instance, try to understand why a certain piece of R code consumes more memory than expected.
-For instance, assume we have an integer vector
+The `profmem()` function of the [profmem] package provides an easy way to profile the memory usage of an R expression.  It logs all memory allocations done in R.  Profiling memory allocations is helpful when we, for instance, try to understand why a certain piece of R code consumes more memory than expected.
+
+The `profmem()` function builds upon existing memory profiling features available in R.  It logs _every_ memory allocation done by plain R code as well as those done by native code such as C and Fortran.  For each entry, it records the size (in bytes) and the name of the functions on the call stack.
+For example,
+
+<% if (capabilities('profmem')) { %>
+<% gc() %>
+```r
+<%=withCapture({
+library("profmem")
+
+p <- profmem({
+  x <- integer(1000)
+  Y <- matrix(rnorm(n=10000), nrow=100)
+})
+p
+})%>
+```
+From this, we find that <%= p$bytes[1] %> bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation is also be confirmed by the value of `object.size(x)`.
+We also see that `rnorm()`, which is called via `matrix()`, allocates <%= p$bytes[2] %> + <%= p$bytes[3] %> bytes, where the first one reflects the <%= length(Y) %> double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
+Finally, the last entry reflects the memory allocation of <%= p$bytes[4] %> bytes done by `matrix()` itself.
+<% } else { %>
+
+**WARNING: This vignette was compiled with an R version that was built with memory profiling disabled, cf. `capabilities('profmem')`.  Please redo!**
+
+<% } ## if (capabilities('profmem')) %>
+
+
+## An example where memory profiling can make a difference
+
+Assume we have an integer vector
 ```r
 <%=withCapture({
 x <- sample(1:10000, size=10000)
 str(x)
 })%>
 ```
-and we would like to identify all elements less than 5000, which can be done as:
+and we would like to identify all elements less than 5000, which can be done as
 ```r
 <%=withCapture({
 small <- (x < 5000)
@@ -42,38 +80,41 @@ typeof(x)
 typeof(5000)
 })%>
 ```
-Because of this difference in types, R choose to first coerce `x` into a double vector before comparing to another double (here `5000`).  Having to coerce to another data type consumes extra memory, which we can see this if we profile the memory:
+Because of this difference in types, R chooses to first coerce `x` into a double vector before comparing with another double (here `5000`).  Having to coerce to another data type consumes extra memory, which we can see if we profile the memory:
 <% if (capabilities('profmem')) { %>
 <% gc() %>
 ```r
 <%=withCapture({
-library("profmem")
 p <- profmem({
   small <- (x < 5000)
 })
 p
 })%>
 ```
-First of all, the size of `x` is <%= object.size(x) %> bytes (from `object.size(x)`), which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of `small` is <%= object.size(small) %> bytes (from `object.size(small)`), which is because each logical value (`TRUE`, `FALSE`, or `NA`) occupies 4 bytes in memory (this is because R represents it internally just like an integer).
+But before anything else, the size of `x` and `small` are:
+```r
+<%=withCapture({
+object.size(x)
+object.size(small)
+})%>
+```
+which is because `x` is of type integer (4 bytes per element) and `small` is of type logical (also 4 bytes per element).
 
-Due the coercion of `x` to double, an internal double vector of the same length as `x` is temporarily created (and populated with values from `x`).  This is what is reported in the first row of `p`.  Since each double value occupies 8 bytes of memory, the size of this internal object is <%= p$bytes[1] %> bytes.
+Now, due the coercion of `x` to double, an internal double vector of the same length as `x` is temporarily created (and populated with values from `x`).  This is what is reported in the first row of `p`.  Since each double value occupies 8 bytes of memory, the size of this internal object is <%= p$bytes[1] %> bytes.
 At this point, R is ready to compare the internal double vector against the double value `5000`.  The result of this comparison will be stored in a logical vector of length <%= length(x) %>.  This is what is reported in the second row of `p`.  This logical vector is assigned to variable `small` at the end.
 
 We can avoid the coercion to double if we compare `x` to an integer value (`5000L`) instead of a double value (`5000`), which is also confirmed if we profile memory allocations;
 ```r
 <%=withCapture({
-library("profmem")
-
 p2 <- profmem({
   small <- (x < 5000L)
 })
 p2
 })%>
 ```
+In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
 
-This illustrates the value of profiling memory usages in R and with the help of `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we run out of memory.
-
-Furthermore, each memory allocation will eventually have to be deallocated and in R this is done by the garbage collector, which automatically runs in the background and recovers allocated but no longer used memory blocks.  Garbage collection takes time and slows down the overall processing in R.  Using the [microbenchmark] package, we can quantify the extra overhead on the garbage collection that is introduced due to the coercion of `x` to double;
+The above illustrates the value of profiling your R code's memory usages and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R.  Using the [microbenchmark] package, we can quantify the extra overhead on the garbage collection that is introduced due to the coercion of `x` to double;
 ```r
 <%=withCapture({
 library("microbenchmark")
@@ -133,3 +174,9 @@ For more information, please see the 'R Installation and Administration' documen
 
 ---
 Copyright Henrik Bengtsson, 2016
+
+<%
+## Clean up
+rm(list="profmem")
+options(oopts)
+%>
