@@ -21,6 +21,18 @@ oopts <- options(
 )
 set.seed(0xBEEF) ## Just to minimize diff when rebuilt
 
+## WORKAROUND: withCapture() doesn't display suffix 'L' in integers
+## in batch mode (https://github.com/HenrikBengtsson/profmem/issues/3)
+## This function provides a manual way to reintroduce it
+if (interactive()) {
+  fixL <- function(x, ...) x
+} else {
+  fixL <- function(x, value=5000L) {
+    pattern <- sprintf("((%d)([^L]|$))", value)
+    gsub(pattern, "\\2L\\3", x)
+  }
+}
+
 ## Initiate the random number generator, because otherwise it will
 ## be done and captured during the first profiling below.  It is not
 ## fully clear to me what the R internals behind this is.  For instance,
@@ -109,12 +121,12 @@ At this point, R is ready to compare the internal double vector against the doub
 
 We can avoid the coercion to double if we compare `x` to an integer value (`5000L`) instead of a double value (`5000`), which is also confirmed if we profile memory allocations;
 ```r
-<%=withCapture({
+<%=fixL(withCapture({
 p2 <- profmem({
   small <- (x < 5000L)
 })
 p2
-})%>
+}))%>
 ```
 In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
 
