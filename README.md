@@ -2,53 +2,90 @@
 
 ## Introduction
 
-The `profmem()` function of the [profmem] package provides an easy way to profile the memory usage of an R expression.  It logs all memory allocations done within R (also by native code of R).  For example,
-
+The `profmem()` function of the [profmem] package provides an easy way to profile the memory usage of an R expression.  It logs all memory allocations done within R (also by native code of R).  Profiling memory allocations is helpful when we for instance try to understand why a certain piece of R code consumes more memory than expected.
+For instance, assume we have an integer vector
+```r
+> x <- sample(1:10000, size = 10000)
+> str(x)
+ int [1:10000] 762 3838 9513 3714 8956 773 4814 179 4581 415 ...
+```
+and we would like to identify all elements less than 5000, which can be done as:
+```r
+> small <- (x < 5000)
+> str(small)
+ logi [1:10000] TRUE TRUE FALSE TRUE FALSE TRUE ...
+```
+This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory allocation and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
+```r
+> typeof(x)
+[1] "integer"
+> typeof(5000)
+[1] "double"
+```
+Because of this, R choose to first coerce `x` into a double vector before comparing to another double (here `5000`).  Having to coerce to another data type consumes extra memory, which we can see this if we profile the memory:
 ```r
 > library("profmem")
 > p <- profmem({
-+     x <- raw(1000)
-+     A <- matrix(rnorm(100), ncol = 10)
++     small <- (x < 5000)
 + })
 > p
 Rprofmem memory profiling of:
 {
-    x <- raw(1000)
-    A <- matrix(rnorm(100), ncol = 10)
+    small <- (x < 5000)
 }
 Memory allocations:
-      bytes               calls
-1      1040               raw()
-2       208            matrix()
-3       416            matrix()
-4       416            matrix()
-5      1064            matrix()
-6       840 matrix() -> rnorm()
-7      2544 matrix() -> rnorm()
-8       840            matrix()
-total  7368                    
-> total(p)
-[1] 7368
-> subset(p, bytes > 1000)
+       bytes      calls
+1      80040 <internal>
+2      40040 <internal>
+total 120080           
+```
+First of all, the size of `x` is 40040 (`object.size(x)`), which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes is due to the internal data structure used for each variable R.  The size of `small` is 40040 (`object.size(small)`), which is because each logical value (`TRUE`, `FALSE`, or `NA`) occupies 4 bytes in memory (this is because R represents it internally just like an integer).
+
+Due the coercion of `x` to double, an internal double vector of same length as `x` is temporarily created (and populated with values from `x`).  This is what is reported in the first row of `p`.  Since each double value occupies 8 bytes of memory, the size of this internal object is 80040 bytes.
+At this point, R is ready to compare the internal double vector against the double value `5000`.  The result of this comparison will be stored in a logical vector of length 10000.  This is what is reported in the second row of `p`.  This logical vector is assigned to variable `small` at the end.
+
+We can avoid the coercion to double if we compare `x` to an integer value (`5000L`) instead of a double value (`5000`), which is also confirmed if we profile memory allocations;
+```r
+> library("profmem")
+> p2 <- profmem({
++     small <- (x < 5000)
++ })
+> p2
 Rprofmem memory profiling of:
 {
-    x <- raw(1000)
-    A <- matrix(rnorm(100), ncol = 10)
+    small <- (x < 5000L)
 }
 Memory allocations:
-      bytes               calls
-1      1040               raw()
-5      1064            matrix()
-7      2544 matrix() -> rnorm()
-total  4648                    
+      bytes      calls
+1     40040 <internal>
+total 40040           
 ```
 
+This illustrates the value of profiling memory usages in R and with the help of `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we run out of memory.
+
+Furthermore, each memory allocation will eventually have to be deallocated and in R this is the work of the garbage collector, which will run once in the awhile in the background in order to recover allocated but no longer used memory blocks.  Garbage collection takes time and slows down the overall processing in R.  Using the [microbenchmark] package, we can quantify the extra overhead on the garbage collection that is introduced due to the coercion of `x` to double;
+```r
+> library("microbenchmark")
+> stats <- microbenchmark(double = (x < 5000), integer = (x < 
++     5000), times = 100, unit = "ms")
+> stats
+Unit: milliseconds
+    expr   min    lq  mean median    uq   max neval
+  double 0.035 0.036 0.049  0.040 0.064 0.073   100
+ integer 0.017 0.017 0.030  0.017 0.026 0.868   100
+```
+Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
 
-## Allocations that are logged
+
+
+## What is logged?
 
 The `profmem()` function uses the `utils::Rprofmem()` function for logging memory allocation events to a temporary file.  The logged events are parsed and returned as an in-memory R object in a format that is convenient to work with.  All memory allocations that are done via the native `allocVector3()` part of R's native API are logged, which means that nearly all memory allocations are logged.  Any objects allocated this way are automatically deallocated by R's garbage collector at some point.  Garbage collection events are _not_ logged by `profmem()`.
 Allocations _not_ logged are those done by non-R native libraries or R packages that use native code `Calloc() / Free()` for internal objects.  Such objects are _not_ handled by the R garbage collector.
+
+### Difference between `utils::Rprofmem()` and `utils::Rprof(memory.profiling = TRUE)`
+In addition to `utils::Rprofmem()`, R also provides `utils::Rprof(memory.profiling = TRUE)`.  Despite the close similarity of their names, the use completely different approaches for profiling the memory usage.  As explained above, the former logs _all individual_ (`allocVector3()`) memory allocation whereas the latter probes the _total_ memory usage of R at regular time intervals.  If memory is allocated and deallocated inbetween two such probe time points, `utils::Rprof(memory.profiling = TRUE)` will not log that memory whereas `utils::Rprofmem()` will pick it up.  On the other hand, with `utils::Rprofmem()` it is not possible to quantify the total memory _usage_ at a given time, because it only logs _allocations_ and does therefore not reflect deallocations done by the garbage collector.
 
 
 ## Requirements
@@ -75,6 +112,7 @@ For more information, please see the 'R Installation and Administration' documen
 
 
 [profmem]: https://github.com/HenrikBengtsson/profmem
+[microbenchmark]: https://cran.r-project.org/package=microbenchmark
 
 
 ## Installation
@@ -83,6 +121,13 @@ R package profmem is only available via [GitHub](https://github.com/HenrikBengts
 source('http://callr.org/install#HenrikBengtsson/profmem')
 ```
 
+### Pre-release version
+
+To install the pre-release version that is available in branch `develop`, use:
+```r
+source('http://callr.org/install#HenrikBengtsson/profmem@develop')
+```
+This will install the package from source.  
 
 
 
