@@ -20,7 +20,7 @@ oopts <- options(
   digits=2L
 )
   
-## Avoid stray/random allocations that only occassionally occurs
+## Avoid stray/random allocations that only occassionally occur
 profmem <- profmem::profmem
 formals(profmem)$threshold <- 2000L
 %>

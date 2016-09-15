@@ -38,13 +38,13 @@ Assume we have an integer vector
 ```r
 > x <- sample(1:10000, size = 10000)
 > str(x)
- int [1:10000] 4039 4225 2395 5843 1911 8101 501 2933 8789 5242 ...
+ int [1:10000] 6583 8676 4397 3630 9207 8022 8331 2989 3477 1554 ...
 ```
 and we would like to identify all elements less than 5000, which can be done as
 ```r
 > small <- (x < 5000)
 > str(small)
- logi [1:10000] TRUE TRUE TRUE FALSE TRUE FALSE ...
+ logi [1:10000] FALSE FALSE TRUE TRUE FALSE FALSE ...
 ```
 This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
 ```r
@@ -106,8 +106,8 @@ The above illustrates the value of profiling your R code's memory usages and tha
 > stats
 Unit: milliseconds
     expr   min    lq  mean median    uq   max neval
-  double 0.035 0.036 0.057  0.036 0.065 0.885   100
- integer 0.017 0.017 0.022  0.017 0.026 0.039   100
+  double 0.035 0.036 0.049  0.036 0.065 0.071   100
+ integer 0.017 0.017 0.030  0.017 0.026 0.874   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
