@@ -39,13 +39,13 @@ Assume we have an integer vector
 ```r
 > x <- sample(1:10000, size = 10000)
 > str(x)
- int [1:10000] 4775 4528 2274 1695 3410 2646 1754 5517 3883 8827 ...
+ int [1:10000] 2464 68 5487 2977 4211 7770 4708 2493 9395 1220 ...
 ```
 and we would like to identify all elements less than 5000, which can be done as
 ```r
 > small <- (x < 5000)
 > str(small)
- logi [1:10000] TRUE TRUE TRUE TRUE TRUE TRUE ...
+ logi [1:10000] TRUE TRUE FALSE TRUE TRUE FALSE ...
 ```
 This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
 ```r
@@ -99,16 +99,18 @@ total 40040
 ```
 In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
 
-The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R.  Using the [microbenchmark] package, we can quantify the extra overhead on the garbage collection that is introduced due to the coercion of `x` to double;
+The above illustrates the value of profiling your R code's memory usages and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R.
+
+Using the [microbenchmark] package, we can quantify the extra overhead [~~on the garbage collection~~](https://github.com/HenrikBengtsson/profmem/issues/1) that is introduced due to the coercion of `x` to double;
 ```r
 > library("microbenchmark")
 > stats <- microbenchmark(double = (x < 5000), integer = (x < 
 +     5000), times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq  max neval
-  double 0.035 0.036 0.049  0.038 0.065 0.07   100
- integer 0.017 0.017 0.030  0.017 0.026 0.87   100
+    expr   min    lq  mean median    uq   max neval
+  double 0.035 0.036 0.058  0.038 0.065 0.908   100
+ integer 0.017 0.017 0.022  0.021 0.027 0.031   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
@@ -157,13 +159,6 @@ R package profmem is available on [CRAN](http://cran.r-project.org/package=profm
 install.packages('profmem')
 ```
 
-### Pre-release version
-
-To install the pre-release version that is available in branch `develop`, use:
-```r
-source('http://callr.org/install#HenrikBengtsson/profmem@develop')
-```
-This will install the package from source.  
 
 
 
