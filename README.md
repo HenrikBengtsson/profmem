@@ -39,13 +39,13 @@ Assume we have an integer vector
 ```r
 > x <- sample(1:10000, size = 10000)
 > str(x)
- int [1:10000] 2056 4840 3810 3667 4318 5398 4689 6322 9101 3496 ...
+ int [1:10000] 4775 4528 2274 1695 3410 2646 1754 5517 3883 8827 ...
 ```
 and we would like to identify all elements less than 5000, which can be done as
 ```r
 > small <- (x < 5000)
 > str(small)
- logi [1:10000] TRUE TRUE TRUE TRUE TRUE FALSE ...
+ logi [1:10000] TRUE TRUE TRUE TRUE TRUE TRUE ...
 ```
 This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
 ```r
@@ -99,16 +99,16 @@ total 40040
 ```
 In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
 
-The above illustrates the value of profiling your R code's memory usages and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R.  Using the [microbenchmark] package, we can quantify the extra overhead on the garbage collection that is introduced due to the coercion of `x` to double;
+The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R.  Using the [microbenchmark] package, we can quantify the extra overhead on the garbage collection that is introduced due to the coercion of `x` to double;
 ```r
 > library("microbenchmark")
 > stats <- microbenchmark(double = (x < 5000), integer = (x < 
 +     5000), times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq   max neval
-  double 0.035 0.035 0.048  0.036 0.064 0.072   100
- integer 0.017 0.017 0.030  0.023 0.027 0.856   100
+    expr   min    lq  mean median    uq  max neval
+  double 0.035 0.036 0.049  0.038 0.065 0.07   100
+ integer 0.017 0.017 0.030  0.017 0.026 0.87   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
@@ -121,7 +121,7 @@ The `profmem()` function uses the `utils::Rprofmem()` function for logging memor
 Allocations _not_ logged are those done by non-R native libraries or R packages that use native code `Calloc() / Free()` for internal objects.  Such objects are _not_ handled by the R garbage collector.
 
 ### Difference between `utils::Rprofmem()` and `utils::Rprof(memory.profiling = TRUE)`
-In addition to `utils::Rprofmem()`, R also provides `utils::Rprof(memory.profiling = TRUE)`.  Despite the close similarity of their names, the use completely different approaches for profiling the memory usage.  As explained above, the former logs _all individual_ (`allocVector3()`) memory allocation whereas the latter probes the _total_ memory usage of R at regular time intervals.  If memory is allocated and deallocated between two such probing time points, `utils::Rprof(memory.profiling = TRUE)` will not log that memory whereas `utils::Rprofmem()` will pick it up.  On the other hand, with `utils::Rprofmem()` it is not possible to quantify the total memory _usage_ at a given time because it only logs _allocations_ and does therefore not reflect deallocations done by the garbage collector.
+In addition to `utils::Rprofmem()`, R also provides `utils::Rprof(memory.profiling = TRUE)`.  Despite the close similarity of their names, they use completely different approaches for profiling the memory usage.  As explained above, the former logs _all individual_ (`allocVector3()`) memory allocation whereas the latter probes the _total_ memory usage of R at regular time intervals.  If memory is allocated and deallocated between two such probing time points, `utils::Rprof(memory.profiling = TRUE)` will not log that memory whereas `utils::Rprofmem()` will pick it up.  On the other hand, with `utils::Rprofmem()` it is not possible to quantify the total memory _usage_ at a given time because it only logs _allocations_ and does therefore not reflect deallocations done by the garbage collector.
 
 
 ## Requirements
@@ -152,9 +152,9 @@ For more information, please see the 'R Installation and Administration' documen
 
 
 ## Installation
-R package profmem is only available via [GitHub](https://github.com/HenrikBengtsson/profmem) and can be installed in R as:
+R package profmem is available on [CRAN](http://cran.r-project.org/package=profmem) and can be installed in R as:
 ```r
-source('http://callr.org/install#HenrikBengtsson/profmem')
+install.packages('profmem')
 ```
 
 ### Pre-release version
@@ -169,8 +169,8 @@ This will install the package from source.
 
 ## Software status
 
-| Resource:     | GitHub        | Travis CI      | Appveyor         |
+| Resource:     | CRAN        | Travis CI      | Appveyor         |
 | ------------- | ------------------- | -------------- | ---------------- |
 | _Platforms:_  | _Multiple_          | _Linux & OS X_ | _Windows_        |
-| R CMD check   |  | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>  | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
+| R CMD check   | <a href="http://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>  | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
 | Test coverage |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>    |                  |
