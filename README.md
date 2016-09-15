@@ -83,13 +83,6 @@ R package profmem is only available via [GitHub](https://github.com/HenrikBengts
 source('http://callr.org/install#HenrikBengtsson/profmem')
 ```
 
-### Pre-release version
-
-To install the pre-release version that is available in branch `feature/data.frame`, use:
-```r
-source('http://callr.org/install#HenrikBengtsson/profmem@feature/data.frame')
-```
-This will install the package from source.  
 
 
 
