@@ -39,13 +39,13 @@ Assume we have an integer vector
 ```r
 > x <- sample(1:10000, size = 10000)
 > str(x)
- int [1:10000] 2056 4840 3810 3667 4318 5398 4689 6322 9101 3496 ...
+ int [1:10000] 2464 68 5487 2977 4211 7770 4708 2493 9395 1220 ...
 ```
 and we would like to identify all elements less than 5000, which can be done as
 ```r
 > small <- (x < 5000)
 > str(small)
- logi [1:10000] TRUE TRUE TRUE TRUE TRUE FALSE ...
+ logi [1:10000] TRUE TRUE FALSE TRUE TRUE FALSE ...
 ```
 This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
 ```r
@@ -107,8 +107,8 @@ The above illustrates the value of profiling your R code's memory usages and tha
 > stats
 Unit: milliseconds
     expr   min    lq  mean median    uq   max neval
-  double 0.035 0.035 0.048  0.036 0.064 0.072   100
- integer 0.017 0.017 0.030  0.023 0.027 0.856   100
+  double 0.035 0.036 0.058  0.038 0.065 0.908   100
+ integer 0.017 0.017 0.022  0.021 0.027 0.031   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
@@ -152,25 +152,18 @@ For more information, please see the 'R Installation and Administration' documen
 
 
 ## Installation
-R package profmem is only available via [GitHub](https://github.com/HenrikBengtsson/profmem) and can be installed in R as:
+R package profmem is available on [CRAN](http://cran.r-project.org/package=profmem) and can be installed in R as:
 ```r
-source('http://callr.org/install#HenrikBengtsson/profmem')
+install.packages('profmem')
 ```
 
-### Pre-release version
-
-To install the pre-release version that is available in branch `develop`, use:
-```r
-source('http://callr.org/install#HenrikBengtsson/profmem@develop')
-```
-This will install the package from source.  
 
 
 
 ## Software status
 
-| Resource:     | GitHub        | Travis CI      | Appveyor         |
+| Resource:     | CRAN        | Travis CI      | Appveyor         |
 | ------------- | ------------------- | -------------- | ---------------- |
 | _Platforms:_  | _Multiple_          | _Linux & OS X_ | _Windows_        |
-| R CMD check   |  | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>  | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
+| R CMD check   | <a href="http://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>  | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
 | Test coverage |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>    |                  |
