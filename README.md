@@ -7,13 +7,13 @@ For instance, assume we have an integer vector
 ```r
 > x <- sample(1:10000, size = 10000)
 > str(x)
- int [1:10000] 762 3838 9513 3714 8956 773 4814 179 4581 415 ...
+ int [1:10000] 7694 3208 7898 5013 9167 201 2587 5483 9523 1067 ...
 ```
 and we would like to identify all elements less than 5000, which can be done as:
 ```r
 > small <- (x < 5000)
 > str(small)
- logi [1:10000] TRUE TRUE FALSE TRUE FALSE TRUE ...
+ logi [1:10000] FALSE TRUE FALSE FALSE FALSE TRUE ...
 ```
 This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory allocation and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
 ```r
@@ -39,7 +39,7 @@ Memory allocations:
 2      40040 <internal>
 total 120080           
 ```
-First of all, the size of `x` is 40040 (`object.size(x)`), which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes is due to the internal data structure used for each variable R.  The size of `small` is 40040 (`object.size(small)`), which is because each logical value (`TRUE`, `FALSE`, or `NA`) occupies 4 bytes in memory (this is because R represents it internally just like an integer).
+First of all, the size of `x` is 40040 bytes (from `object.size(x)`), which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes is due to the internal data structure used for each variable R.  The size of `small` is 40040 bytes (from `object.size(small)`), which is because each logical value (`TRUE`, `FALSE`, or `NA`) occupies 4 bytes in memory (this is because R represents it internally just like an integer).
 
 Due the coercion of `x` to double, an internal double vector of same length as `x` is temporarily created (and populated with values from `x`).  This is what is reported in the first row of `p`.  Since each double value occupies 8 bytes of memory, the size of this internal object is 80040 bytes.
 At this point, R is ready to compare the internal double vector against the double value `5000`.  The result of this comparison will be stored in a logical vector of length 10000.  This is what is reported in the second row of `p`.  This logical vector is assigned to variable `small` at the end.
@@ -70,9 +70,9 @@ Furthermore, each memory allocation will eventually have to be deallocated and i
 +     5000), times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq   max neval
-  double 0.035 0.036 0.049  0.040 0.064 0.073   100
- integer 0.017 0.017 0.030  0.017 0.026 0.868   100
+    expr   min    lq  mean median    uq  max neval
+  double 0.035 0.036 0.059  0.037 0.066 0.86   100
+ integer 0.017 0.017 0.025  0.025 0.029 0.06   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
