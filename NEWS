@@ -1,6 +1,10 @@
 Package: profmem
 ================
 
+Version: 0.4.0-9000 [2016-09-14]
+o ...
+
+
 Version: 0.4.0 [2016-09-14]
 o profmem() now returns a data.frame of class Rprofmem.
 o profmem() gained argument threshold.
