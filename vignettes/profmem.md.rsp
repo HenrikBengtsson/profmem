@@ -34,6 +34,8 @@ p <- profmem({
 p
 
 total(p)
+
+subset(p, bytes > 1000)
 })%>
 ```
 

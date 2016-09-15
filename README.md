@@ -27,6 +27,20 @@ Memory allocations:
 7      2544 matrix() -> rnorm()
 8       840            matrix()
 total  7368                    
+> total(p)
+[1] 7368
+> subset(p, bytes > 1000)
+Rprofmem memory profiling of:
+{
+    x <- raw(1000)
+    A <- matrix(rnorm(100), ncol = 10)
+}
+Memory allocations:
+      bytes               calls
+1      1040               raw()
+5      1064            matrix()
+7      2544 matrix() -> rnorm()
+total  4648                    
 ```
 
 
@@ -45,8 +59,13 @@ In order for `profmem()` to work, R must have been built with memory profiling e
 profmem 
    TRUE 
 ```
+The overhead of running an R installation with memory profiling enabled compared to one without is neglectable / non-measurable.
 
-To enable memory profiling (only if the above reports `FALSE`), R needs to be _configured_ and _built_ from source using:
+Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, it has been confirmed that the R 3.3.1 binaries for Windows and the ones for the Debian Linux distribution have been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the macOS binaries, but this has to be confirmed.
+
+
+### Enabling memory profiling
+To enable memory profiling (only needed if `capabilities("profmem")` returns `FALSE`), R needs to be _configured_ and _built_ from source using:
 ```sh
 $ ./configure --enable-memory-profiling
 $ make
@@ -64,6 +83,13 @@ R package profmem is only available via [GitHub](https://github.com/HenrikBengts
 source('http://callr.org/install#HenrikBengtsson/profmem')
 ```
 
+### Pre-release version
+
+To install the pre-release version that is available in branch `feature/data.frame`, use:
+```r
+source('http://callr.org/install#HenrikBengtsson/profmem@feature/data.frame')
+```
+This will install the package from source.  
 
 
 

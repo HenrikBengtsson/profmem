@@ -22,7 +22,7 @@ parsed into bytes and call stack information.}
 \item{...}{Not used}
 }
 \value{
-An object of class \code{Rprofmem} (or a character vector)
+An \code{Rprofmem} data.frame (or a character vector)
 }
 \description{
 Reads and parses an Rprofmem log file that was created by
