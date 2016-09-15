@@ -108,9 +108,9 @@ Using the [microbenchmark] package, we can quantify the extra overhead [~~on the
 +     5000), times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq   max neval
-  double 0.035 0.035 0.049  0.036 0.065 0.071   100
- integer 0.017 0.017 0.030  0.017 0.027 0.846   100
+    expr   min    lq  mean median    uq  max neval
+  double 0.035 0.035 0.049  0.040 0.065 0.07   100
+ integer 0.017 0.017 0.031  0.017 0.027 0.84   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
@@ -136,7 +136,7 @@ profmem
 ```
 The overhead of running an R installation with memory profiling enabled compared to one without is neglectable / non-measurable.
 
-Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, [it has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R 3.3.1 binaries for Windows and the ones for the Ubuntu Linux distribution have been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the macOS binaries, but this has to be confirmed.
+Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, [it has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R binaries for Windows, the ones from the Ubuntu Linux distribution, and the nightly builds for macOS by the AT&T Research Lab have all been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the other macOS binaries, but this has to be confirmed.
 
 
 To enable memory profiling, which is _only_ needed if `capabilities("profmem")` returns `FALSE`, R needs to be _configured_ and _built_ from source using:
