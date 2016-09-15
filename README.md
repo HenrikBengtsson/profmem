@@ -25,7 +25,8 @@ Memory allocations:
 2      80040 matrix() -> rnorm()
 3       2544 matrix() -> rnorm()
 4      80040            matrix()
-total 166664                    
+5        312          <internal>
+total 166976                    
 ```
 From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation is also be confirmed by the value of `object.size(x)`.
 We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
@@ -38,13 +39,13 @@ Assume we have an integer vector
 ```r
 > x <- sample(1:10000, size = 10000)
 > str(x)
- int [1:10000] 6583 8676 4397 3630 9207 8022 8331 2989 3477 1554 ...
+ int [1:10000] 2056 4840 3810 3667 4318 5398 4689 6322 9101 3496 ...
 ```
 and we would like to identify all elements less than 5000, which can be done as
 ```r
 > small <- (x < 5000)
 > str(small)
- logi [1:10000] FALSE FALSE TRUE TRUE FALSE FALSE ...
+ logi [1:10000] TRUE TRUE TRUE TRUE TRUE FALSE ...
 ```
 This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
 ```r
@@ -106,8 +107,8 @@ The above illustrates the value of profiling your R code's memory usages and tha
 > stats
 Unit: milliseconds
     expr   min    lq  mean median    uq   max neval
-  double 0.035 0.036 0.049  0.036 0.065 0.071   100
- integer 0.017 0.017 0.030  0.017 0.026 0.874   100
+  double 0.035 0.035 0.048  0.036 0.064 0.072   100
+ integer 0.017 0.017 0.030  0.023 0.027 0.856   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 

@@ -19,10 +19,13 @@ oopts <- options(
   mc.cores=2L,
   digits=2L
 )
-  
-## Avoid stray/random allocations that only occassionally occur
-profmem <- profmem::profmem
-formals(profmem)$threshold <- 2000L
+
+## Initiate the random number generator, because otherwise it will
+## be done and captured during the first profiling below.  It is not
+## fully clear to me what the R internals behind this is.  For instance,
+## it is not enough to call `sample.int(n=1)`.  But calling rnorm(n=1)
+## seems to avoid the problem.
+rnorm(n=1)
 %>
 
 # Simple Memory Profiling in R
@@ -177,6 +180,5 @@ Copyright Henrik Bengtsson, 2016
 
 <%
 ## Clean up
-rm(list="profmem")
 options(oopts)
 %>
