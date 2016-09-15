@@ -5,7 +5,7 @@
 #'
 #' @return A non-negative numeric.
 #'
-#' @aliases total.Rprofmem
+#' @aliases total.Rprofmem subset.Rprofmem
 #' @export
 #' @keywords internal
 total <- function(x, ...) UseMethod("total")
@@ -13,6 +13,13 @@ total <- function(x, ...) UseMethod("total")
 #' @export
 total.Rprofmem <- function(x, ...) {
   sum(x$bytes, na.rm=TRUE)
+}
+
+#' @export
+subset.Rprofmem <- function(x, ...) {
+  res <- NextMethod("subset")
+  attr(res, "expression") <- attr(x, "expression")
+  res
 }
 
 #' @export
@@ -24,7 +31,13 @@ as.data.frame.Rprofmem <- function(x, ...) {
     trace[hasName] <- sprintf("%s()", trace[hasName])
     paste(trace, collapse=" -> ")
   }))
-  data.frame(bytes=bytes, calls=traces, stringsAsFactors=FALSE)
+  
+  res <- data.frame(bytes=bytes, calls=traces, stringsAsFactors=FALSE)
+
+  ## Preserve row names
+  rownames(res) <- rownames(x)
+  
+  res
 } ## as.data.frame()
 
 
