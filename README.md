@@ -99,20 +99,21 @@ total 40040
 ```
 In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
 
-The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R.
-
-Using the [microbenchmark] package, we can quantify the extra overhead [~~on the garbage collection~~](https://github.com/HenrikBengtsson/profmem/issues/1) that is introduced due to the coercion of `x` to double;
+Using the [microbenchmark] package, we can also quantify the extra overhead in processing time that is introduced due to the coercion of `x` to double;
 ```r
 > library("microbenchmark")
 > stats <- microbenchmark(double = (x < 5000), integer = (x < 
 +     5000), times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq  max neval
-  double 0.035 0.035 0.049  0.040 0.065 0.07   100
- integer 0.017 0.017 0.031  0.017 0.027 0.84   100
+    expr   min    lq  mean median    uq   max neval
+  double 0.035 0.036 0.048  0.036 0.064 0.073   100
+ integer 0.017 0.017 0.030  0.017 0.027 0.865   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
+
+
+The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.
 
 
 
