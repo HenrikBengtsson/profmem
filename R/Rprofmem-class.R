@@ -1,30 +1,43 @@
 #' Total number of bytes allocated
 #'
-#' @param x An Rprofmem object.
+#' @param x An \code{Rprofmem} object.
 #' @param ... Not used.
 #'
 #' @return A non-negative numeric.
 #'
-#' @aliases total.Rprofmem
+#' @aliases total.Rprofmem subset.Rprofmem
 #' @export
+#' @keywords internal
 total <- function(x, ...) UseMethod("total")
 
 #' @export
 total.Rprofmem <- function(x, ...) {
-  bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
-  sum(bytes, na.rm=TRUE)
+  sum(x$bytes, na.rm=TRUE)
+}
+
+#' @export
+subset.Rprofmem <- function(x, ...) {
+  res <- NextMethod("subset")
+  attr(res, "expression") <- attr(x, "expression")
+  res
 }
 
 #' @export
 as.data.frame.Rprofmem <- function(x, ...) {
-  bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
-  traces <- unlist(lapply(x, FUN=function(x) {
-    trace <- rev(x$trace)
+  bytes <- x$bytes
+  traces <- unlist(lapply(x$trace, FUN=function(x) {
+    trace <- rev(x)
     hasName <- !grepl("^<[^>]*>$", trace)
     trace[hasName] <- sprintf("%s()", trace[hasName])
     paste(trace, collapse=" -> ")
   }))
-  data.frame(bytes=bytes, calls=traces, stringsAsFactors=FALSE)
+  
+  res <- data.frame(bytes=bytes, calls=traces, stringsAsFactors=FALSE)
+
+  ## Preserve row names
+  rownames(res) <- rownames(x)
+  
+  res
 } ## as.data.frame()
 
 

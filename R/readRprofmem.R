@@ -1,11 +1,23 @@
-#' Reads and parses an Rprofmem log file
+#' Read an Rprofmem log file
+#'
+#' Reads and parses an Rprofmem log file that was created by
+#' \code{\link[utils]{Rprofmem}()}.
 #'
 #' @param pathname The Rprofmem log file to be read.
 #' @param as Specifies in what format data should be returned.
+#' If \code{"raw"}, the line content of the file is returned as is
+#' (as a character vector).
+#' If \code{"fixed"}, as \code{"raw"} but with missing newlines
+#' added to lines with empty stack calls (see [1]).
+#' If \code{"Rprofmem"}, the collected Rprofmem data is fully
+#' parsed into bytes and call stack information.
 #' @param drop Number of levels to drop from the top of the call stack.
 #' @param ... Not used
 #'
-#' @return An object of class \code{Rprofmem} (or a character vector)
+#' @return An \code{Rprofmem} data.frame (or a character vector)
+#'
+#' @references
+#' [1] \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
 #'
 #' @export
 #' @importFrom utils file_test
@@ -46,7 +58,13 @@ readRprofmem <- function(pathname, as=c("Rprofmem", "fixed", "raw"), drop=0L, ..
     list(bytes=bytes, trace=trace)
   })
 
-  class(bfr) <- c("Rprofmem", class(bfr))
+  bytes <- unlist(lapply(bfr, FUN=function(x) x$bytes), use.names=FALSE)
+  traces <- lapply(bfr, FUN=function(x) x$trace)
+  res <- data.frame(bytes=bytes, stringsAsFactors=FALSE)
+  res$trace <- traces
+  bfr <- bytes <- traces <- NULL
+  
+  class(res) <- c("Rprofmem", class(res))
 
-  bfr
+  res
 } ## readRprofmem()

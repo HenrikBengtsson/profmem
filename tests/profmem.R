@@ -26,4 +26,8 @@ if (capabilities("profmem")) {
   })
   print(p)
 
+  p2 <- subset(p, bytes > 40000)
+  print(p2)
+
 } ## if (capabilities("profmem"))
+

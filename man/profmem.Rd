@@ -4,14 +4,17 @@
 \alias{profmem}
 \title{Memory profiles an R expression}
 \usage{
-profmem(expr, envir = parent.frame(), substitute = TRUE, ...)
+profmem(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L,
+  ...)
 }
 \arguments{
-\item{expr}{An R expression to be evaluated.}
+\item{expr}{An R expression to be evaluated and profiled.}
 
 \item{envir}{The environment in which the expression should be evaluated.}
 
 \item{substitute}{Should \code{expr} be \code{substitute()}:d or not.}
+
+\item{threshold}{The smallest memory allocation (in bytes) to log.}
 
 \item{...}{Not used.}
 }
@@ -24,12 +27,29 @@ Memory profiles an R expression
 \examples{
 if (capabilities("profmem")) {
 
+## Memory profile an R expression
 p <- profmem({
   x <- raw(1000)
   A <- matrix(rnorm(100), ncol=10)
 })
+
+## Display the results
 print(p)
 
+## Total amount of memory allocation
+total(p)
+
+## Allocations greater than 1 kB
+p2 <- subset(p, bytes > 1000)
+print(p2)
+
+## The expression is evaluated in the calling environment
+str(x)
+str(A)
+
 }
+}
+\seealso{
+Internally \code{\link[utils]{Rprofmem}()} is used.
 }
 

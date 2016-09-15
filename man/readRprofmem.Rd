@@ -2,23 +2,33 @@
 % Please edit documentation in R/readRprofmem.R
 \name{readRprofmem}
 \alias{readRprofmem}
-\title{Reads and parses an Rprofmem log file}
+\title{Read an Rprofmem log file}
 \usage{
 readRprofmem(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...)
 }
 \arguments{
 \item{pathname}{The Rprofmem log file to be read.}
 
-\item{as}{Specifies in what format data should be returned.}
+\item{as}{Specifies in what format data should be returned.
+If \code{"raw"}, the line content of the file is returned as is
+(as a character vector).
+If \code{"fixed"}, as \code{"raw"} but with missing newlines
+added to lines with empty stack calls (see [1]).
+If \code{"Rprofmem"}, the collected Rprofmem data is fully
+parsed into bytes and call stack information.}
 
 \item{drop}{Number of levels to drop from the top of the call stack.}
 
 \item{...}{Not used}
 }
 \value{
-An object of class \code{Rprofmem} (or a character vector)
+An \code{Rprofmem} data.frame (or a character vector)
 }
 \description{
-Reads and parses an Rprofmem log file
+Reads and parses an Rprofmem log file that was created by
+\code{\link[utils]{Rprofmem}()}.
+}
+\references{
+[1] \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
 }
 
