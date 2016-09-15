@@ -22,15 +22,15 @@ Rprofmem memory profiling of:
 Memory allocations:
        bytes               calls
 1       4040           integer()
-2      80040 matrix() -> rnorm()
-3       2544 matrix() -> rnorm()
-4      80040            matrix()
-5        312          <internal>
+2        312          <internal>
+3      80040 matrix() -> rnorm()
+4       2544 matrix() -> rnorm()
+5      80040            matrix()
 total 166976                    
 ```
-From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation is also be confirmed by the value of `object.size(x)`.
-We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
-Finally, the last entry reflects the memory allocation of 80040 bytes done by `matrix()` itself.
+From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
+We also see that `rnorm()`, which is called via `matrix()`, allocates 312 + 80040 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
+Finally, the last entry reflects the memory allocation of 2544 bytes done by `matrix()` itself.
 
 
 ## An example where memory profiling can make a difference
@@ -39,13 +39,13 @@ Assume we have an integer vector
 ```r
 > x <- sample(1:10000, size = 10000)
 > str(x)
- int [1:10000] 2464 68 5487 2977 4211 7770 4708 2493 9395 1220 ...
+ int [1:10000] 7148 9595 741 1573 4829 4405 1459 17 2857 9193 ...
 ```
-and we would like to identify all elements less than 5000, which can be done as
+and we would like to identify all elements less than 5000.  Then we can use
 ```r
 > small <- (x < 5000)
 > str(small)
- logi [1:10000] TRUE TRUE FALSE TRUE TRUE FALSE ...
+ logi [1:10000] FALSE FALSE TRUE TRUE TRUE TRUE ...
 ```
 This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
 ```r
@@ -70,7 +70,7 @@ Memory allocations:
 2      40040 <internal>
 total 120080           
 ```
-But before anything else, the size of `x` and `small` are:
+But before anything else, the sizes of `x` and `small` are:
 ```r
 > object.size(x)
 40040 bytes
@@ -85,7 +85,7 @@ At this point, R is ready to compare the internal double vector against the doub
 We can avoid the coercion to double if we compare `x` to an integer value (`5000L`) instead of a double value (`5000`), which is also confirmed if we profile memory allocations;
 ```r
 > p2 <- profmem({
-+     small <- (x < 5000)
++     small <- (x < 5000L)
 + })
 > p2
 Rprofmem memory profiling of:
@@ -99,9 +99,7 @@ total 40040
 ```
 In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
 
-The above illustrates the value of profiling your R code's memory usages and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R.
-
-Using the [microbenchmark] package, we can quantify the extra overhead [~~on the garbage collection~~](https://github.com/HenrikBengtsson/profmem/issues/1) that is introduced due to the coercion of `x` to double;
+Using the [microbenchmark] package, we can also quantify the extra overhead in processing time that is introduced due to the coercion of `x` to double;
 ```r
 > library("microbenchmark")
 > stats <- microbenchmark(double = (x < 5000), integer = (x < 
@@ -109,10 +107,13 @@ Using the [microbenchmark] package, we can quantify the extra overhead [~~on the
 > stats
 Unit: milliseconds
     expr   min    lq  mean median    uq   max neval
-  double 0.035 0.036 0.058  0.038 0.065 0.908   100
- integer 0.017 0.017 0.022  0.021 0.027 0.031   100
+  double 0.035 0.036 0.049  0.037 0.065 0.072   100
+ integer 0.017 0.017 0.030  0.017 0.027 0.872   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
+
+
+The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.
 
 
 
@@ -123,7 +124,7 @@ The `profmem()` function uses the `utils::Rprofmem()` function for logging memor
 Allocations _not_ logged are those done by non-R native libraries or R packages that use native code `Calloc() / Free()` for internal objects.  Such objects are _not_ handled by the R garbage collector.
 
 ### Difference between `utils::Rprofmem()` and `utils::Rprof(memory.profiling = TRUE)`
-In addition to `utils::Rprofmem()`, R also provides `utils::Rprof(memory.profiling = TRUE)`.  Despite the close similarity of their names, the use completely different approaches for profiling the memory usage.  As explained above, the former logs _all individual_ (`allocVector3()`) memory allocation whereas the latter probes the _total_ memory usage of R at regular time intervals.  If memory is allocated and deallocated between two such probing time points, `utils::Rprof(memory.profiling = TRUE)` will not log that memory whereas `utils::Rprofmem()` will pick it up.  On the other hand, with `utils::Rprofmem()` it is not possible to quantify the total memory _usage_ at a given time because it only logs _allocations_ and does therefore not reflect deallocations done by the garbage collector.
+In addition to `utils::Rprofmem()`, R also provides `utils::Rprof(memory.profiling = TRUE)`.  Despite the close similarity of their names, they use completely different approaches for profiling the memory usage.  As explained above, the former logs _all individual_ (`allocVector3()`) memory allocation whereas the latter probes the _total_ memory usage of R at regular time intervals.  If memory is allocated and deallocated between two such probing time points, `utils::Rprof(memory.profiling = TRUE)` will not log that memory whereas `utils::Rprofmem()` will pick it up.  On the other hand, with `utils::Rprofmem()` it is not possible to quantify the total memory _usage_ at a given time because it only logs _allocations_ and does therefore not reflect deallocations done by the garbage collector.
 
 
 ## Requirements
@@ -136,11 +137,10 @@ profmem
 ```
 The overhead of running an R installation with memory profiling enabled compared to one without is neglectable / non-measurable.
 
-Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, it has been confirmed that the R 3.3.1 binaries for Windows and the ones for the Debian Linux distribution have been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the macOS binaries, but this has to be confirmed.
+Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, [it has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R binaries for Windows, the ones from the Ubuntu Linux distribution, and the nightly builds for macOS by the AT&T Research Lab have all been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the other macOS binaries, but this has to be confirmed.
 
 
-### Enabling memory profiling
-To enable memory profiling (only needed if `capabilities("profmem")` returns `FALSE`), R needs to be _configured_ and _built_ from source using:
+To enable memory profiling, which is _only_ needed if `capabilities("profmem")` returns `FALSE`, R needs to be _configured_ and _built_ from source using:
 ```sh
 $ ./configure --enable-memory-profiling
 $ make
@@ -149,7 +149,7 @@ For more information, please see the 'R Installation and Administration' documen
 
 
 
-[profmem]: https://github.com/HenrikBengtsson/profmem
+[profmem]: https://cran.r-project.org/package=profmem
 [microbenchmark]: https://cran.r-project.org/package=microbenchmark
 
 
@@ -159,6 +159,13 @@ R package profmem is available on [CRAN](http://cran.r-project.org/package=profm
 install.packages('profmem')
 ```
 
+### Pre-release version
+
+To install the pre-release version that is available in branch `develop`, use:
+```r
+source('http://callr.org/install#HenrikBengtsson/profmem@develop')
+```
+This will install the package from source.  
 
 
 
