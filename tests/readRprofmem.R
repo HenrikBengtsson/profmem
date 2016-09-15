@@ -29,6 +29,6 @@ if (capabilities("profmem")) {
   cat("readRprofmem(..., as='Rprofmem'):\n")
   print(p)
   str(p)
-  stopifnot(length(p) == length(fixed))
+  stopifnot(nrow(p) == length(fixed))
 
 } ## if (capabilities("profmem"))

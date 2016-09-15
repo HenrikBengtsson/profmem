@@ -12,15 +12,14 @@ total <- function(x, ...) UseMethod("total")
 
 #' @export
 total.Rprofmem <- function(x, ...) {
-  bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
-  sum(bytes, na.rm=TRUE)
+  sum(x$bytes, na.rm=TRUE)
 }
 
 #' @export
 as.data.frame.Rprofmem <- function(x, ...) {
-  bytes <- unlist(lapply(x, FUN=function(x) x$bytes))
-  traces <- unlist(lapply(x, FUN=function(x) {
-    trace <- rev(x$trace)
+  bytes <- x$bytes
+  traces <- unlist(lapply(x$trace, FUN=function(x) {
+    trace <- rev(x)
     hasName <- !grepl("^<[^>]*>$", trace)
     trace[hasName] <- sprintf("%s()", trace[hasName])
     paste(trace, collapse=" -> ")
