@@ -102,12 +102,12 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 ```r
 > library("microbenchmark")
 > stats <- microbenchmark(double = (x < 5000), integer = (x < 
-+     5000), times = 100, unit = "ms")
++     5000L), times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq   max neval
-  double 0.035 0.036 0.049  0.037 0.064 0.076   100
- integer 0.017 0.017 0.030  0.017 0.027 0.859   100
+    expr   min    lq  mean median    uq  max neval
+  double 0.035 0.036 0.055  0.037 0.064 0.70   100
+ integer 0.017 0.017 0.029  0.017 0.026 0.85   100
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
