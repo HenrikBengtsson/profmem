@@ -15,17 +15,10 @@
 <%
 library("R.utils")
 
-
-## WORKAROUND: withCapture() doesn't display suffix 'L' in integers
-## in batch mode (https://github.com/HenrikBengtsson/profmem/issues/3)
-## This will be fixed in R.utils (> 2.4.0).  Until then, the solution
-## is to set options(keep.source=TRUE).
-
 oopts <- options(
   "withCapture/newline"=FALSE,
   mc.cores=2L,
-  digits=2L,
-  keep.source=TRUE
+  digits=2L
 )
 set.seed(0xBEEF) ## Just to minimize diff when rebuilt
 
