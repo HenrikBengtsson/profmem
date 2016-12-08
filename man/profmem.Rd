@@ -2,10 +2,11 @@
 % Please edit documentation in R/profmem.R
 \name{profmem}
 \alias{profmem}
+\alias{profmem_stepwise}
 \title{Memory profiles an R expression}
 \usage{
-profmem(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L,
-  ...)
+profmem(expr, envir = parent.frame(), substitute = TRUE, stepwise = FALSE,
+  threshold = 0L, ...)
 }
 \arguments{
 \item{expr}{An R expression to be evaluated and profiled.}
@@ -13,6 +14,9 @@ profmem(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L,
 \item{envir}{The environment in which the expression should be evaluated.}
 
 \item{substitute}{Should \code{expr} be \code{substitute()}:d or not.}
+
+\item{stepwise}{Should each subsexpression of \code{expr} be profiled
+seperately or not.}
 
 \item{threshold}{The smallest memory allocation (in bytes) to log.}
 

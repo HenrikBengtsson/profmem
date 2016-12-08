@@ -3,6 +3,8 @@
 #' @param expr An R expression to be evaluated and profiled.
 #' @param envir The environment in which the expression should be evaluated.
 #' @param substitute Should \code{expr} be \code{substitute()}:d or not.
+#' @param stepwise Should each subsexpression of \code{expr} be profiled
+#'        seperately or not.
 #' @param threshold The smallest memory allocation (in bytes) to log.
 #' @param ... Not used.
 #'
@@ -13,9 +15,10 @@
 #' @seealso
 #' Internally \code{\link[utils]{Rprofmem}()} is used.
 #'
+#' @aliases profmem_stepwise
 #' @export
 #' @importFrom utils Rprofmem
-profmem <- function(expr, envir=parent.frame(), substitute=TRUE, threshold=0L, ...) {
+profmem <- function(expr, envir=parent.frame(), substitute=TRUE, stepwise=FALSE, threshold=0L, ...) {
   if (substitute) expr <- substitute(expr)
 
   ## Is memory profiling supported?
@@ -27,6 +30,33 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, threshold=0L, .
     stop(msg)
   }
 
+  if (stepwise) {
+    expr2 <- inject_profmem_expression(expr, threshold = threshold)
+    res <- eval(expr2, envir = envir)
+    rm(list = ".profmem", envir = envir, inherits = FALSE)
+
+    ## Annotate
+    attr(res, "expression") <- expr
+    attr(res, "value") <- attr(res[[length(res)]], "value")
+    error <- NULL
+    for (kk in seq_along(res)) {
+      error_kk <- attr(res[[kk]], "error")
+      if (!is.null(error_kk)) {
+        error <- error_kk
+	break
+      }
+    }
+    attr(res, "error") <- error
+  } else {
+    res <- profmem_expression(expr, envir = envir, threshold = threshold)
+  }
+
+  res
+} ## profmem()
+
+
+
+profmem_expression <- function(expr, envir=parent.frame(), threshold=0L) {
   pathname <- tempfile(pattern="profmem", fileext="Rprofmem.out")
   on.exit(file.remove(pathname))
 
@@ -44,12 +74,12 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, threshold=0L, .
 
   ## Import log
   drop <- length(sys.calls()) + 6L
-  bfr <-  readRprofmem(pathname, as="Rprofmem", drop=drop)
+  res <-  readRprofmem(pathname, as="Rprofmem", drop=drop)
 
   ## Annotate
-  attr(bfr, "expression") <- expr
-  attr(bfr, "value") <- value
-  attr(bfr, "error") <- error
+  attr(res, "expression") <- expr
+  attr(res, "value") <- value
+  attr(res, "error") <- error
 
-  bfr
-} ## profmem()
+  res
+} ## profmem_expression()

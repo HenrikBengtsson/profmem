@@ -1,7 +1,8 @@
 Package: profmem
 ================
 
-Version: 0.4.0-9000 [2016-09-15]
+Version: 0.4.0-9000 [2016-12-07]
+o Add support for profiling individual subexpressions.
 o VIGNETTE: The microbenchmark paragraph incorrectly claimed that
   the difference is also due to the garbage collection; it is most
   likely only due to the coercion of integer to double.
