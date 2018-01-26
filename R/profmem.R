@@ -43,6 +43,17 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
 
 profmem_env <- new.env()
 
+profmem_add_note <- function(..., timestamp = TRUE) {
+  pathname <- profmem_env$pathname
+  stopifnot(!is.null(pathname))
+  msg <- sprintf(...)
+  if (timestamp) {
+    msg <- sprintf("[%s] %s", format(Sys.time(), "%Y%m%d-%H%M%S"), msg)
+  }
+  msg <- sprintf("# %s\n", msg)
+  cat(msg, file = pathname, append = TRUE)
+}
+
 #' @rdname profmem
 #' @importFrom utils Rprofmem
 #' @export
@@ -62,8 +73,9 @@ profmem_begin <- function(threshold = 0L, ...) {
   }
   
   pathname <- tempfile(pattern = "profmem", fileext = "Rprofmem.out")
-  Rprofmem(filename = pathname, append = FALSE, threshold = threshold)
   profmem_env$pathname <- pathname
+  profmem_add_note("profmem: begin")
+  Rprofmem(filename = pathname, append = TRUE, threshold = threshold)
   invisible(pathname)
 }
 
@@ -77,6 +89,7 @@ profmem_end <- function() {
   }
 
   Rprofmem("")
+  profmem_add_note("profmem: end")
   
   on.exit({
     profmem_env$pathname <- NULL

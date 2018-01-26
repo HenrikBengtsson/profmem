@@ -21,7 +21,7 @@
 #'
 #' @export
 #' @importFrom utils file_test
-readRprofmem <- function(pathname, as=c("Rprofmem", "fixed", "raw"), drop=0L, ...) {
+readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...) {
   stopifnot(file_test("-f", pathname))
   as <- match.arg(as)
   drop <- as.integer(drop)
@@ -41,6 +41,10 @@ readRprofmem <- function(pathname, as=c("Rprofmem", "fixed", "raw"), drop=0L, ..
   }
   if (as == "fixed") return(bfr)
 
+  writeLines(bfr)
+  
+  ## Drop comments
+  bfr <- grep("^#", bfr, value = TRUE, invert = TRUE)
 
   ## Parse Rprofmem results
   pattern <- "^([0-9]+ |new page):(.*)"
