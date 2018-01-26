@@ -15,6 +15,10 @@ total.Rprofmem <- function(x, ...) {
   sum(x$bytes, na.rm=TRUE)
 }
 
+nrow.Rprofmem <- function(x) {
+  length(x$bytes)
+}
+
 #' @export
 subset.Rprofmem <- function(x, ...) {
   res <- NextMethod("subset")

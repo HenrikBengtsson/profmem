@@ -7,6 +7,8 @@ NEW FEATURES:
 
  o Added profmem_begin() and profmem_end().
 
+ o nrow() on an Rprofmem object now gives the number of allocations.
+
 DOCUMENTATION:
 
  o VIGNETTE: The microbenchmark paragraph incorrectly claimed that the
