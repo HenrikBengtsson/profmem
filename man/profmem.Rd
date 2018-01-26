@@ -12,7 +12,7 @@ profmem(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L,
 
 \item{envir}{The environment in which the expression should be evaluated.}
 
-\item{substitute}{Should \code{expr} be \code{substitute()}:d or not.}
+\item{substitute}{Should \code{expr} be \code{\link[base:substitute]{base::substitute()}}:d or not.}
 
 \item{threshold}{The smallest memory allocation (in bytes) to log.}
 
@@ -50,6 +50,5 @@ str(A)
 }
 }
 \seealso{
-Internally \code{\link[utils]{Rprofmem}()} is used.
+Internally \code{\link[utils:Rprofmem]{utils::Rprofmem()}} is used.
 }
-

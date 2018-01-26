@@ -1,23 +1,23 @@
 #' Read an Rprofmem log file
 #'
 #' Reads and parses an Rprofmem log file that was created by
-#' \code{\link[utils]{Rprofmem}()}.
+#' [utils::Rprofmem()].
 #'
 #' @param pathname The Rprofmem log file to be read.
 #' @param as Specifies in what format data should be returned.
-#' If \code{"raw"}, the line content of the file is returned as is
+#' If `"raw"`, the line content of the file is returned as is
 #' (as a character vector).
-#' If \code{"fixed"}, as \code{"raw"} but with missing newlines
-#' added to lines with empty stack calls (see [1]).
-#' If \code{"Rprofmem"}, the collected Rprofmem data is fully
+#' If `"fixed"`, as `"raw"` but with missing newlines
+#' added to lines with empty stack calls (see Ref. 1).
+#' If `"Rprofmem"`, the collected Rprofmem data is fully
 #' parsed into bytes and call stack information.
 #' @param drop Number of levels to drop from the top of the call stack.
 #' @param ... Not used
 #'
-#' @return An \code{Rprofmem} data.frame (or a character vector)
+#' @return An `Rprofmem` data.frame (or a character vector)
 #'
 #' @references
-#' [1] \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
+#' Ref. 1: \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
 #'
 #' @export
 #' @importFrom utils file_test

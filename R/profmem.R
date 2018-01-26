@@ -2,16 +2,16 @@
 #'
 #' @param expr An R expression to be evaluated and profiled.
 #' @param envir The environment in which the expression should be evaluated.
-#' @param substitute Should \code{expr} be \code{substitute()}:d or not.
+#' @param substitute Should `expr` be [base::substitute()]:d or not.
 #' @param threshold The smallest memory allocation (in bytes) to log.
 #' @param ... Not used.
 #'
-#' @return An object of class \code{Rprofmem}.
+#' @return An object of class `Rprofmem`.
 #'
 #' @example incl/profmem.R
 #'
 #' @seealso
-#' Internally \code{\link[utils]{Rprofmem}()} is used.
+#' Internally [utils::Rprofmem()] is used.
 #'
 #' @export
 #' @importFrom utils Rprofmem

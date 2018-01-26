@@ -1,6 +1,6 @@
 #' Total number of bytes allocated
 #'
-#' @param x An \code{Rprofmem} object.
+#' @param x An `Rprofmem` object.
 #' @param ... Not used.
 #'
 #' @return A non-negative numeric.
