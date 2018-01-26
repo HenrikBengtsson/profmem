@@ -4,6 +4,7 @@
 #' [utils::Rprofmem()].
 #'
 #' @param pathname The Rprofmem log file to be read.
+#' 
 #' @param as Specifies in what format data should be returned.
 #' If `"raw"`, the line content of the file is returned as is
 #' (as a character vector).
@@ -11,7 +12,11 @@
 #' added to lines with empty stack calls (see Ref. 1).
 #' If `"Rprofmem"`, the collected Rprofmem data is fully
 #' parsed into bytes and call stack information.
+#' If `"profmem"`, then also \pkg{profmem}-specific entries injected into
+#' the Rprofmem log file by \pkg{profmem} are also parsed.
+#' 
 #' @param drop Number of levels to drop from the top of the call stack.
+#' 
 #' @param ... Not used
 #'
 #' @return An `Rprofmem` data.frame (or a character vector)
@@ -21,7 +26,7 @@
 #'
 #' @export
 #' @importFrom utils file_test
-readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...) {
+readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw"), drop = 0L, ...) {
   stopifnot(file_test("-f", pathname))
   as <- match.arg(as)
   drop <- as.integer(drop)
@@ -44,7 +49,9 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L
   writeLines(bfr)
   
   ## Drop comments
-  bfr <- grep("^#", bfr, value = TRUE, invert = TRUE)
+  if (as == "profmem") {
+    bfr <- grep("^#", bfr, value = TRUE, invert = TRUE)
+  }
 
   ## Parse Rprofmem results
   pattern <- "^([0-9]+ |new page):(.*)"

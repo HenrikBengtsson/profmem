@@ -43,9 +43,18 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
 
 profmem_env <- new.env()
 
+
+profmem_add_string <- function(msg, ...) {
+  pathname <- profmem_env$pathname
+  if (is.null(pathname)) return()
+  cat(msg, file = pathname, append = TRUE)
+}
+
+## FIXME: This produces lots of extra memory allocations, which
+## we don't want to inject.
 profmem_add_note <- function(..., timestamp = TRUE) {
   pathname <- profmem_env$pathname
-  stopifnot(!is.null(pathname))
+  if (is.null(pathname)) return()
   msg <- sprintf(...)
   if (timestamp) {
     msg <- sprintf("[%s] %s", format(Sys.time(), "%Y%m%d-%H%M%S"), msg)
@@ -89,6 +98,7 @@ profmem_end <- function() {
   }
 
   Rprofmem("")
+  profmem_add_string("\n")
   profmem_add_note("profmem: end")
   
   on.exit({
@@ -98,5 +108,5 @@ profmem_end <- function() {
 
   ## Import log
   drop <- length(sys.calls()) + 6L
-  readRprofmem(pathname, as = "Rprofmem", drop = drop)
+  readRprofmem(pathname, as = "profmem", drop = drop)
 }
