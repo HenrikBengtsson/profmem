@@ -46,7 +46,7 @@ readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw")
   }
   if (as == "fixed") return(bfr)
 
-  writeLines(bfr)
+  if (getOption("profmem.debug", FALSE)) writeLines(bfr)
   
   ## Drop comments
   if (as == "profmem") {
