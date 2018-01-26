@@ -43,8 +43,12 @@ as.data.frame.Rprofmem <- function(x, ...) {
 
 #' @export
 print.Rprofmem <- function(x, ...) {
-  cat("Rprofmem memory profiling of:\n")
-  print(attr(x, "expression"))
+  if ("expression" %in% names(attributes(x))) {
+    cat("Rprofmem memory profiling of:\n")
+    print(attr(x, "expression"))
+  } else {
+    cat("Rprofmem memory profiling:\n")
+  }
 
   cat("\nMemory allocations:\n")
   data <- as.data.frame(x)

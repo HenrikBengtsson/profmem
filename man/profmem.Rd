@@ -2,10 +2,16 @@
 % Please edit documentation in R/profmem.R
 \name{profmem}
 \alias{profmem}
+\alias{profmem_begin}
+\alias{profmem_end}
 \title{Memory profiles an R expression}
 \usage{
 profmem(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L,
   ...)
+
+profmem_begin(threshold = 0L, ...)
+
+profmem_end()
 }
 \arguments{
 \item{expr}{An R expression to be evaluated and profiled.}

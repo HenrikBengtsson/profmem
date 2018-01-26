@@ -53,3 +53,52 @@ profmem <- function(expr, envir=parent.frame(), substitute=TRUE, threshold=0L, .
 
   bfr
 } ## profmem()
+
+
+
+profmem_env <- new.env()
+
+#' @rdname profmem
+#' @importFrom utils Rprofmem
+#' @export
+profmem_begin <- function(threshold = 0L, ...) {
+  ## Is memory profiling supported?
+  if (!capableOfProfmem()) {
+    msg <- "Profiling of memory allocations is not supported on this R system (capabilities('profmem') reports FALSE). See help('tracemem')."
+    if (.Platform$OS.type == "unix") {
+      msg <- paste(msg, "To enable memory profiling for R on Linux, R needs to be configured and built using './configure --enable-memory-profiling'.")
+    }
+    stop(msg)
+  }
+
+  pathname <- profmem_env$pathname
+  if (!is.null(pathname)) {
+    stop("An active profmem_begin() already exists, which can be terminated by profmem_end().")
+  }
+  
+  pathname <- tempfile(pattern = "profmem", fileext = "Rprofmem.out")
+  Rprofmem(filename = pathname, append = FALSE, threshold = threshold)
+  profmem_env$pathname <- pathname
+  invisible(pathname)
+}
+
+#' @rdname profmem
+#' @importFrom utils Rprofmem
+#' @export
+profmem_end <- function() {
+  pathname <- profmem_env$pathname
+  if (is.null(pathname)) {
+    stop("Did you forget to call profmem_begin()?")
+  }
+
+  Rprofmem("")
+  
+  on.exit({
+    profmem_env$pathname <- NULL
+    file.remove(pathname)
+  })
+
+  ## Import log
+  drop <- length(sys.calls()) + 6L
+  readRprofmem(pathname, as = "Rprofmem", drop = drop)
+}

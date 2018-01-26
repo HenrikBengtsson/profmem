@@ -1,31 +1,59 @@
 Package: profmem
 ================
 
-Version: 0.4.0-9000 [2016-09-15]
-o VIGNETTE: The microbenchmark paragraph incorrectly claimed that
-  the difference is also due to the garbage collection; it is most
-  likely only due to the coercion of integer to double.
+Version: 0.4.0-9000 [2018-01-25]
 
+NEW FEATURES:
 
+ o Added profmem_begin() and profmem_end().
+
+DOCUMENTATION:
+
+ o VIGNETTE: The microbenchmark paragraph incorrectly claimed that the
+   difference is also due to the garbage collection; it is most likely only
+   due to the coercion of integer to double.
+ 
+ 
 Version: 0.4.0 [2016-09-14]
-o profmem() now returns a data.frame of class Rprofmem.
-o profmem() gained argument threshold.
-o 100% test coverage.
 
+NEW FEATURES:
 
+ o profmem() now returns a data.frame of class Rprofmem.
+ 
+ o profmem() gained argument threshold.
+
+CODE QUALITY:
+
+ o 100% test coverage.
+ 
+ 
 Version: 0.3.0 [2016-08-06]
-o Added vignette.
 
+DOCUMENTATION:
 
+ o Added vignette.
+ 
+ 
 Version: 0.2.1 [2016-07-11]
-o Added readRprofmem().
 
+NEW FEATURES:
 
+ o Added readRprofmem().
+ 
+ 
 Version: 0.2.0 [2016-06-05]
-o Added total() to get the total number of bytes allocated.
-o profmem() returns also when evaluating the expression gives an error.
 
+NEW FEATURES:
 
+ o Added total() to get the total number of bytes allocated.
+ 
+ o profmem() returns also when evaluating the expression gives an error.
+ 
+ 
 Version: 0.1.0 [2016-06-04]
-o Added profmem().
-o Package created.
+
+SIGNIFICANT CHANGES:
+
+ o Added profmem().
+ 
+ o Package created.
