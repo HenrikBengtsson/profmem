@@ -38,7 +38,7 @@ install:
 
 build_script:
   - echo Current directory=%CD%
-  - Rscript -e 'capabilities()' -e 'c(physical = parallel::detectCores(logical = FALSE), logical = parallel::detectCores())'
+  - Rscript -e "capabilities()" -e "c(physical = parallel::detectCores(logical = FALSE), logical = parallel::detectCores())"
 test_script:
   - travis-tool.sh run_tests
 
