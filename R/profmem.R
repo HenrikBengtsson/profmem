@@ -138,26 +138,23 @@ profmem_begin <- function(threshold = 0L, ...) {
   }
   
   ## Push new level
-  profmem_stack("push")
+  depth <- profmem_stack("push")
   
-##  profmem_add_note("profmem: begin")
   profmem_resume(threshold = threshold)
   
-  invisible(profmem_stack("depth"))
+  invisible(depth)
 }
 
 #' @rdname profmem
 #' @export
 profmem_end <- function() {
   profmem_suspend()
-  
-  if (profmem_stack("depth") == 0) {
+
+  depth <- profmem_stack("depth")
+  if (depth == 0) {
     stop("Did you forget to call profmem_begin()?")
   }
 
-##  profmem_add_string("\n")
-##  profmem_add_note("profmem: end")
-  
   data <- profmem_stack("pop")
 
   if (getOption("profmem.debug", FALSE)) {

@@ -39,11 +39,12 @@ readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw")
 
   ## WORKAROUND: Add newlines for entries with empty call stacks
   ## https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25
-  pattern <- "^([0-9]+) :([0-9]+) :"
+  pattern <- "^(new page|[0-9]+)[ ]?:(new page|[0-9]+)[ ]?:"
   while(any(grepl(pattern, bfr))) {
     bfr <- gsub(pattern, "\\1 :\n\\2 :", bfr)
     bfr <- unlist(strsplit(bfr, split="\n", fixed=TRUE))
   }
+
   if (as == "fixed") return(bfr)
 
   if (getOption("profmem.debug", FALSE)) writeLines(bfr)
@@ -51,11 +52,10 @@ readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw")
   ## Drop comments
   if (as == "profmem") {
     bfr <- grep("^#", bfr, value = TRUE, invert = TRUE)
-    bfr <- grep("new page", bfr, value = TRUE, invert = TRUE)
   }
 
   ## Parse Rprofmem results
-  pattern <- "^([0-9]+ |new page):(.*)"
+  pattern <- "^([0-9]+|new page)[ ]?:(.*)"
   bfr <- lapply(bfr, FUN=function(x) {
     bytes <- gsub(pattern, "\\1", x)
     bytes[bytes == "new page"] <- ""  # Will become NA below w/out warning

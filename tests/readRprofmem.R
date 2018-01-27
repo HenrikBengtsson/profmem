@@ -1,34 +1,65 @@
 library("profmem")
 
-if (capabilities("profmem")) {
+message("readRprofmem() ...")
 
-  pathname <- tempfile()
-  Rprofmem(pathname)
+broken <- system.file("extdata", "broken.Rprofile.out", package = "profmem")
+
+bfr <- readLines(broken)
+cat("readLines(broken):\n")
+print(bfr)
+
+raw <- readRprofmem(broken, as = "raw")
+cat("readRprofmem(broken, as = 'raw'):\n")
+print(raw)
+stopifnot(
+  length(raw) == length(bfr),
+  all(raw == bfr)
+)
+
+fixed <- readRprofmem(broken, as = "fixed")
+cat("readRprofmem(broken, as = 'fixed'):\n")
+print(fixed)
+stopifnot(length(fixed) >= length(bfr))
+
+p <- readRprofmem(broken, as = "Rprofmem")
+cat("readRprofmem(broken, as = 'Rprofmem'):\n")
+print(p)
+str(p)
+stopifnot(nrow(p) == length(fixed))
+
+
+if (capabilities("profmem")) {
+  
+  live <- tempfile()
+  Rprofmem(live)
   x <- raw(1000)
   A <- matrix(rnorm(100), ncol=10)
   Rprofmem()
 
-  bfr <- readLines(pathname)
-  cat("readLines(...):\n")
+  bfr <- readLines(live)
+  cat("readLines(live):\n")
   print(bfr)
   
-  raw <- readRprofmem(pathname, as="raw")
-  cat("readRprofmem(..., as='raw'):\n")
+  raw <- readRprofmem(live, as = "raw")
+  cat("readRprofmem(live, as = 'raw'):\n")
   print(raw)
   stopifnot(
     length(raw) == length(bfr),
     all(raw == bfr)
   )
 
-  fixed <- readRprofmem(pathname, as="fixed")
-  cat("readRprofmem(..., as='fixed'):\n")
+  fixed <- readRprofmem(live, as = "fixed")
+  cat("readRprofmem(live, as = 'fixed'):\n")
   print(fixed)
   stopifnot(length(fixed) >= length(bfr))
 
-  p <- readRprofmem(pathname, as="Rprofmem")
-  cat("readRprofmem(..., as='Rprofmem'):\n")
+  p <- readRprofmem(live, as = "Rprofmem")
+  cat("readRprofmem(live, as = 'Rprofmem'):\n")
   print(p)
   str(p)
   stopifnot(nrow(p) == length(fixed))
 
 } ## if (capabilities("profmem"))
+
+message("readRprofmem() ... DONE")
+

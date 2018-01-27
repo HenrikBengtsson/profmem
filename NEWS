@@ -16,7 +16,11 @@ DOCUMENTATION:
  o VIGNETTE: The microbenchmark paragraph incorrectly claimed that the
    difference is also due to the garbage collection; it is most likely only
    due to the coercion of integer to double.
- 
+
+BUG FIX:
+
+ o readRprofmem() failed to "workaround" another buggy Rprofmem() output.
+   
  
 Version: 0.4.0 [2016-09-14]
 
