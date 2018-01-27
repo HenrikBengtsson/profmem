@@ -122,8 +122,6 @@ profmem_stack <- local({
 #' @rdname profmem
 #' @export
 profmem_begin <- function(threshold = 0L, ...) {
-  profmem_suspend()
-  
   ## Is memory profiling supported?
   if (!capableOfProfmem()) {
     msg <- "Profiling of memory allocations is not supported on this R system (capabilities('profmem') reports FALSE). See help('tracemem')."
@@ -133,6 +131,8 @@ profmem_begin <- function(threshold = 0L, ...) {
     stop(msg)
   }
 
+  profmem_suspend()
+    
   if (getOption("profmem.debug", FALSE)) {
     message("profmem_begin(): stack depth: ", profmem_stack("depth"))
   }
