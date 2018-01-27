@@ -20,6 +20,24 @@ nrow.Rprofmem <- function(x) {
 }
 
 #' @export
+c.Rprofmem <- function(...) {
+  args <- list(...)
+  bytes <- NULL
+  trace <- NULL
+  for (arg in args) {
+    stopifnot(inherits(arg, "Rprofmem"))
+    bytes <- c(bytes, arg$bytes)
+    trace <- c(trace, arg$trace)
+  }
+
+  res <- data.frame(bytes = bytes, stringsAsFactors = FALSE)
+  res$trace <- trace
+  class(res) <- c("Rprofmem", class(res))
+  
+  res
+}
+
+#' @export
 subset.Rprofmem <- function(x, ...) {
   res <- NextMethod("subset")
   attr(res, "expression") <- attr(x, "expression")

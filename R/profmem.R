@@ -40,33 +40,90 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
 } ## profmem()
 
 
-
-profmem_env <- new.env()
-
-
 profmem_add_string <- function(msg, ...) {
-  pathname <- profmem_env$pathname
-  if (is.null(pathname)) return()
-  cat(msg, file = pathname, append = TRUE)
+  pathname <- profmem_pathname()
+  if (getOption("profmem.debug", FALSE)) {
+    message("profmem_add_string(): pathname: ", pathname)
+    message("profmem_add_string(): exists: ", file_test("-f", pathname))
+  }
+  cat(msg, file = pathname, append = file_test("-f", pathname))
 }
 
 ## FIXME: This produces lots of extra memory allocations, which
 ## we don't want to inject.
 profmem_add_note <- function(..., timestamp = TRUE) {
-  pathname <- profmem_env$pathname
-  if (is.null(pathname)) return()
   msg <- sprintf(...)
   if (timestamp) {
     msg <- sprintf("[%s] %s", format(Sys.time(), "%Y%m%d-%H%M%S"), msg)
   }
   msg <- sprintf("# %s\n", msg)
-  cat(msg, file = pathname, append = TRUE)
+  profmem_add_string(msg)
 }
 
+
+
+profmem_pathname <- local({
+  pathname <- NULL
+  function() {
+    if (!is.null(pathname)) return(pathname)
+    pathname <<- tempfile(pattern = "profmem.", fileext = ".Rprofmem.out")
+    pathname
+  }
+})
+
+profmem_stack <- local({
+  empty <- data.frame(bytes = NULL, trace = NULL, stringsAsFactors = FALSE)
+  empty <- structure(empty, class = c("Rprofmem", "data.frame"))
+  
+  stack <- list()
+  
+  function(action = c("depth", "push", "pop", "append"), data = empty) {
+    action <- match.arg(action)
+    if (action == "depth") return(length(stack))
+
+    if (action == "push") {
+      stopifnot(inherits(data, "Rprofmem"))
+      stack <<- c(stack, list(data))
+#      message("PUSH: stack depth: ", length(stack))
+      return(length(stack))
+    }
+    
+    if (action == "pop") {
+      depth <- length(stack)
+      if (depth == 0) stop("Cannot 'pop' - profmem stack is empty")
+      value <- stack[[depth]]
+      stack <<- stack[-depth]
+      depth <- length(stack)
+      if (depth >= 1) {
+        tmp <- stack[[depth]]
+        tmp <- if (is.null(tmp)) value else c(tmp, value)
+        stack[[depth]] <<- tmp
+      }
+#      message("POP: stack depth: ", length(stack))
+      return(value)
+    }
+
+    if (action == "append") {
+      depth <- length(stack)
+      if (depth == 0) stop("Cannot 'append' - profmem stack is empty")
+      stopifnot(inherits(data, "Rprofmem"))
+      value <- stack[[depth]]
+      value <- if (is.null(value)) data else c(value, data)
+      stack[[depth]] <<- value
+#      message("APPEND: stack depth: ", length(stack))
+      return(invisible(value))
+    }
+    
+
+    stop("Unknown 'action': ", action)
+  }
+})
+
 #' @rdname profmem
-#' @importFrom utils Rprofmem
 #' @export
 profmem_begin <- function(threshold = 0L, ...) {
+  profmem_suspend()
+  
   ## Is memory profiling supported?
   if (!capableOfProfmem()) {
     msg <- "Profiling of memory allocations is not supported on this R system (capabilities('profmem') reports FALSE). See help('tracemem')."
@@ -76,37 +133,61 @@ profmem_begin <- function(threshold = 0L, ...) {
     stop(msg)
   }
 
-  pathname <- profmem_env$pathname
-  if (!is.null(pathname)) {
-    stop("An active profmem_begin() already exists, which can be terminated by profmem_end().")
+  if (getOption("profmem.debug", FALSE)) {
+    message("profmem_begin(): stack depth: ", profmem_stack("depth"))
   }
   
-  pathname <- tempfile(pattern = "profmem", fileext = "Rprofmem.out")
-  profmem_env$pathname <- pathname
-  profmem_add_note("profmem: begin")
-  Rprofmem(filename = pathname, append = TRUE, threshold = threshold)
-  invisible(pathname)
+  ## Push new level
+  profmem_stack("push")
+  
+##  profmem_add_note("profmem: begin")
+  profmem_resume(threshold = threshold)
+  
+  invisible(profmem_stack("depth"))
 }
 
 #' @rdname profmem
-#' @importFrom utils Rprofmem
 #' @export
 profmem_end <- function() {
-  pathname <- profmem_env$pathname
-  if (is.null(pathname)) {
+  profmem_suspend()
+  
+  if (profmem_stack("depth") == 0) {
     stop("Did you forget to call profmem_begin()?")
   }
 
-  Rprofmem("")
-  profmem_add_string("\n")
-  profmem_add_note("profmem: end")
+##  profmem_add_string("\n")
+##  profmem_add_note("profmem: end")
   
-  on.exit({
-    profmem_env$pathname <- NULL
-    file.remove(pathname)
-  })
+  data <- profmem_stack("pop")
 
-  ## Import log
+  if (getOption("profmem.debug", FALSE)) {
+    message("profmem_end(): stack depth: ", profmem_stack("depth"))
+  }
+
+  profmem_resume()
+  
+  data
+}
+
+#' @importFrom utils Rprofmem
+profmem_suspend <- function() {
+  ## Works regardless of active Rprofmem exists or not
+  Rprofmem("")
+
+  ## Nothing more to do?
+  if (profmem_stack("depth") == 0) return()
+  
+  ## Import current log
   drop <- length(sys.calls()) + 6L
-  readRprofmem(pathname, as = "profmem", drop = drop)
+  pathname <- profmem_pathname()
+  data <- readRprofmem(pathname, drop = drop, as = "profmem")
+  profmem_stack("append", data)
+
+  invisible()
+}
+
+#' @importFrom utils Rprofmem
+profmem_resume <- function(threshold = 0L) {
+  pathname <- profmem_pathname()
+  Rprofmem(filename = pathname, threshold = threshold)
 }

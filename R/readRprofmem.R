@@ -51,6 +51,7 @@ readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw")
   ## Drop comments
   if (as == "profmem") {
     bfr <- grep("^#", bfr, value = TRUE, invert = TRUE)
+    bfr <- grep("new page", bfr, value = TRUE, invert = TRUE)
   }
 
   ## Parse Rprofmem results

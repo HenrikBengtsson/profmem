@@ -1,10 +1,12 @@
 Package: profmem
 ================
 
-Version: 0.4.0-9000 [2018-01-25]
+Version: 0.4.0-9000 [2018-01-26]
 
 NEW FEATURES:
 
+ o Nested profmem() calls are now supported.
+ 
  o Added profmem_begin() and profmem_end().
 
  o nrow() on an Rprofmem object now gives the number of allocations.
