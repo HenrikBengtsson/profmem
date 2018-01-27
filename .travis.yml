@@ -36,7 +36,10 @@ matrix:
       after_success:
       - Rscript -e 'covr::codecov(quiet=FALSE)'
       env: NB='w/ covr' ## Just a label
-    
+
+before_install:
+  - Rscript -e 'capabilities()' -e 'c(physical = parallel::detectCores(logical = FALSE), logical = parallel::detectCores())'
+
 notifications:
   email:
     on_success: change
