@@ -185,7 +185,7 @@ For more information, please see the 'R Installation and Administration' documen
 [microbenchmark]: https://cran.r-project.org/package=microbenchmark
 
 ---
-Copyright Henrik Bengtsson, 2016
+Copyright Henrik Bengtsson, 2016-2018
 
 <%
 ## Clean up

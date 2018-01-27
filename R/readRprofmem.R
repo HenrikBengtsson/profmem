@@ -64,6 +64,12 @@ readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw")
     trace <- gsub(pattern, "\\2", x)
     trace <- gsub('" "', '", "', trace, fixed=TRUE)
     trace <- sprintf("c(%s)", trace)
+  
+    if (getOption("profmem.debug", FALSE)) {
+      message(bytes, ": ", trace)
+      message("drop: ", drop)
+    }
+    
     trace <- eval(parse(text=trace))
     trace <- trace[seq_len(max(0L, length(trace)-drop))]
 
