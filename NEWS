@@ -1,11 +1,16 @@
 Package: profmem
 ================
 
-Version: 0.4.0-9000 [2018-01-26]
+Version: 0.4.0-9000 [2018-01-27]
+
+SIGNIFICANT CHANGES:
+
+ o Nested profmem() calls are now supported, such that inner profmem() calls
+   will not affect outer ones.  This allows, for instance, a package to use
+   profmem internally without having to worry about profmem already being
+   active when its functions are called.
 
 NEW FEATURES:
-
- o Nested profmem() calls are now supported.
  
  o Added profmem_begin() and profmem_end().
 
