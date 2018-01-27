@@ -175,7 +175,7 @@ profmem_suspend <- function() {
   if (profmem_stack("depth") == 0) return()
   
   ## Import current log
-  drop <- length(sys.calls()) + 6L
+  drop <- length(sys.calls()) + 4L
   pathname <- profmem_pathname()
   data <- readRprofmem(pathname, drop = drop, as = "Rprofmem")
   if (getOption("profmem.debug", FALSE)) str(data)
