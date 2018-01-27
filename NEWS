@@ -1,10 +1,12 @@
 Package: profmem
 ================
 
-Version: 0.4.0-9000 [2018-01-25]
+Version: 0.4.0-9000 [2018-01-26]
 
 NEW FEATURES:
 
+ o Nested profmem() calls are now supported.
+ 
  o Added profmem_begin() and profmem_end().
 
  o nrow() on an Rprofmem object now gives the number of allocations.
@@ -14,7 +16,11 @@ DOCUMENTATION:
  o VIGNETTE: The microbenchmark paragraph incorrectly claimed that the
    difference is also due to the garbage collection; it is most likely only
    due to the coercion of integer to double.
- 
+
+BUG FIX:
+
+ o readRprofmem() failed to "workaround" another buggy Rprofmem() output.
+   
  
 Version: 0.4.0 [2016-09-14]
 
