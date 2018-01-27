@@ -25,7 +25,8 @@ Memory allocations:
 2      80040 matrix() -> rnorm()
 3       2544 matrix() -> rnorm()
 4      80040            matrix()
-total 166664                    
+5       1064          <internal>
+total 167728                    
 ```
 From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
 We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
@@ -64,10 +65,9 @@ Rprofmem memory profiling of:
     small <- (x < 5000)
 }
 Memory allocations:
-       bytes      calls
-1      80040 <internal>
-2      40040 <internal>
-total 120080           
+      bytes      calls
+1     40040 <internal>
+total 40040           
 ```
 But before anything else, the sizes of `x` and `small` are:
 ```r
@@ -78,7 +78,7 @@ But before anything else, the sizes of `x` and `small` are:
 ```
 which is because `x` is of type integer (4 bytes per element) and `small` is of type logical (also 4 bytes per element).
 
-Now, due the coercion of `x` to double, an internal double vector of the same length as `x` is temporarily created (and populated with values from `x`).  This is what is reported in the first row of `p`.  Since each double value occupies 8 bytes of memory, the size of this internal object is 80040 bytes.
+Now, due the coercion of `x` to double, an internal double vector of the same length as `x` is temporarily created (and populated with values from `x`).  This is what is reported in the first row of `p`.  Since each double value occupies 8 bytes of memory, the size of this internal object is 40040 bytes.
 At this point, R is ready to compare the internal double vector against the double value `5000`.  The result of this comparison will be stored in a logical vector of length 10000.  This is what is reported in the second row of `p`.  This logical vector is assigned to variable `small` at the end.
 
 We can avoid the coercion to double if we compare `x` to an integer value (`5000L`) instead of a double value (`5000`), which is also confirmed if we profile memory allocations;
@@ -93,7 +93,11 @@ Rprofmem memory profiling of:
 }
 Memory allocations:
       bytes      calls
-1     40040 <internal>
+1        NA <internal>
+2        NA <internal>
+3        NA <internal>
+4     40040 <internal>
+5        NA <internal>
 total 40040           
 ```
 In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
@@ -105,9 +109,9 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 +     5000L), times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq  max neval
-  double 0.035 0.036 0.055  0.037 0.064 0.70   100
- integer 0.017 0.017 0.029  0.017 0.026 0.85   100
+    expr   min    lq  mean median    uq   max neval cld
+  double 0.041 0.048 0.053  0.051 0.056 0.090   100   b
+ integer 0.029 0.040 0.045  0.043 0.051 0.058   100  a 
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
@@ -153,25 +157,32 @@ For more information, please see the 'R Installation and Administration' documen
 
 
 ## Installation
-R package profmem is available on [CRAN](http://cran.r-project.org/package=profmem) and can be installed in R as:
+R package profmem is available on [CRAN](https://cran.r-project.org/package=profmem) and can be installed in R as:
 ```r
 install.packages('profmem')
 ```
 
 ### Pre-release version
 
-To install the pre-release version that is available in branch `develop`, use:
+To install the pre-release version that is available in Git branch `develop` on GitHub, use:
 ```r
-source('http://callr.org/install#HenrikBengtsson/profmem@develop')
+remotes::install_github('HenrikBengtsson/profmem@develop')
 ```
 This will install the package from source.  
 
 
 
+## Contributions
+
+This Git repository uses the [Git Flow](http://nvie.com/posts/a-successful-git-branching-model/) branching model (the [`git flow`](https://github.com/petervanderdoes/gitflow-avh) extension is useful for this).  The [`develop`](https://github.com/HenrikBengtsson/profmem/tree/develop) branch contains the latest contributions and other code that will appear in the next release, and the [`master`](https://github.com/HenrikBengtsson/profmem) branch contains the code of the latest release, which is exactly what is currently on [CRAN](https://cran.r-project.org/package=profmem).
+
+Contributing to this package is easy.  Just send a [pull request](https://help.github.com/articles/using-pull-requests/).  When you send your PR, make sure `develop` is the destination branch on the [profmem repository](https://github.com/HenrikBengtsson/profmem).  Your PR should pass `R CMD check --as-cran`, which will also be checked by <a href="https://travis-ci.org/HenrikBengtsson/profmem">Travis CI</a> and <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem">AppVeyor CI</a> when the PR is submitted.
+
+
 ## Software status
 
-| Resource:     | CRAN        | Travis CI      | Appveyor         |
-| ------------- | ------------------- | -------------- | ---------------- |
-| _Platforms:_  | _Multiple_          | _Linux & OS X_ | _Windows_        |
-| R CMD check   | <a href="http://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>  | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
-| Test coverage |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>    |                  |
+| Resource:     | CRAN        | Travis CI       | Appveyor         |
+| ------------- | ------------------- | --------------- | ---------------- |
+| _Platforms:_  | _Multiple_          | _Linux & macOS_ | _Windows_        |
+| R CMD check   | <a href="https://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>   | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
+| Test coverage |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>     |                  |
