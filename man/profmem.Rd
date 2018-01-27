@@ -4,14 +4,19 @@
 \alias{profmem}
 \alias{profmem_begin}
 \alias{profmem_end}
-\title{Memory profiles an R expression}
+\alias{profmem_suspend}
+\alias{profmem_resume}
+\title{Memory profiling R}
 \usage{
-profmem(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L,
-  ...)
+profmem(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L)
 
-profmem_begin(threshold = 0L, ...)
+profmem_begin(threshold = 0L)
 
 profmem_end()
+
+profmem_suspend()
+
+profmem_resume(threshold = 0L)
 }
 \arguments{
 \item{expr}{An R expression to be evaluated and profiled.}
@@ -21,14 +26,38 @@ profmem_end()
 \item{substitute}{Should \code{expr} be \code{\link[base:substitute]{base::substitute()}}:d or not.}
 
 \item{threshold}{The smallest memory allocation (in bytes) to log.}
-
-\item{...}{Not used.}
 }
 \value{
-An object of class \code{Rprofmem}.
+\code{profmem()} and \code{profmem_end()} returns the collected \code{Rprofmem} data.
+\code{profmem_begin()} returns (invisibly) the number of nested profmem
+session currently active.
+\code{profmem_suspend()} and \code{profmem_resume()} returns nothing.
 }
 \description{
-Memory profiles an R expression
+\code{profmem()} evaluates and memory profiles an \R expression.
+
+\code{profmem_begin()} starts the memory profiling of all the following \R
+evaluations until \code{profmem_end()} is called.
+
+\code{profmem_suspend()} suspends an active profiling until resumed by
+\code{profmem_resume()} or ended by \code{profmem_end()}.
+Calling \code{profmem_begin()} or \code{profmem()} will resume any suspended
+profiling; \emph{nested} resuming and suspending is \emph{not} supported.
+}
+\details{
+Profiling gathered by \pkg{profmem} \emph{will} be corrupted if the code profiled
+calls \code{\link[utils:Rprofmem]{utils::Rprofmem()}}, with the exception of such calls done via the
+\pkg{profmem} package itself.
+
+Any memory events that would occur due to calling any of the \pkg{profmem}
+functions themselves will \emph{not} be logged and \emph{not} be part of the returned
+profile data (regardless whether memory profiling is active or not).
+
+If a profmem profiling is already active, \code{profmem()} and \code{profmem_begin()}
+performs an \emph{independent}, \emph{nested} profiling, which has no affect on the
+already active one.  When the active one completes, it will contain all
+memory events also collected by the nested profiling as if the nested one
+never occurred.
 }
 \examples{
 if (capabilities("profmem")) {

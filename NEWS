@@ -12,7 +12,10 @@ SIGNIFICANT CHANGES:
 
 NEW FEATURES:
  
- o Added profmem_begin() and profmem_end().
+ o Added profmem_begin() and profmem_end() as an alternative to profmem().
+
+ o Added profmem_suspend() and profmem_resume() for suspending and resuming
+   an active profmem session.
 
  o nrow() on an Rprofmem object now gives the number of allocations.
 

@@ -1,67 +1,3 @@
-#' Memory profiles an R expression
-#'
-#' @param expr An R expression to be evaluated and profiled.
-#' @param envir The environment in which the expression should be evaluated.
-#' @param substitute Should `expr` be [base::substitute()]:d or not.
-#' @param threshold The smallest memory allocation (in bytes) to log.
-#' @param ... Not used.
-#'
-#' @return An object of class `Rprofmem`.
-#'
-#' @example incl/profmem.R
-#'
-#' @seealso
-#' Internally [utils::Rprofmem()] is used.
-#'
-#' @export
-#' @importFrom utils Rprofmem
-profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L, ...) {
-  if (substitute) expr <- substitute(expr)
-
-  profmem_begin(threshold = threshold)
-  
-  ## Profile memory
-  error <- NULL
-  value <- tryCatch({
-    eval(expr, envir=envir)
-  }, error = function(ex) {
-    error <<- ex
-    NULL
-  })
-
-  pm <-  profmem_end()
-
-  ## Annotate
-  attr(pm, "expression") <- expr
-  attr(pm, "value") <- value
-  attr(pm, "error") <- error
-
-  pm
-} ## profmem()
-
-
-profmem_add_string <- function(msg, ...) {
-  pathname <- profmem_pathname()
-  if (getOption("profmem.debug", FALSE)) {
-    message("profmem_add_string(): pathname: ", pathname)
-    message("profmem_add_string(): exists: ", file_test("-f", pathname))
-  }
-  cat(msg, file = pathname, append = file_test("-f", pathname))
-}
-
-## FIXME: This produces lots of extra memory allocations, which
-## we don't want to inject.
-profmem_add_note <- function(..., timestamp = TRUE) {
-  msg <- sprintf(...)
-  if (timestamp) {
-    msg <- sprintf("[%s] %s", format(Sys.time(), "%Y%m%d-%H%M%S"), msg)
-  }
-  msg <- sprintf("# %s\n", msg)
-  profmem_add_string(msg)
-}
-
-
-
 profmem_pathname <- local({
   pathname <- NULL
   function() {
@@ -119,9 +55,78 @@ profmem_stack <- local({
   }
 })
 
+
+#' Memory profiling R
+#'
+#' `profmem()` evaluates and memory profiles an \R expression.
+#'
+#' @param expr An R expression to be evaluated and profiled.
+#' 
+#' @param envir The environment in which the expression should be evaluated.
+#' 
+#' @param substitute Should `expr` be [base::substitute()]:d or not.
+#' 
+#' @param threshold The smallest memory allocation (in bytes) to log.
+#'
+#' @return
+#' `profmem()` and `profmem_end()` returns the collected `Rprofmem` data.
+#' `profmem_begin()` returns (invisibly) the number of nested profmem
+#' session currently active.
+#' `profmem_suspend()` and `profmem_resume()` returns nothing.
+#'
+#' @details
+#' Profiling gathered by \pkg{profmem} _will_ be corrupted if the code profiled
+#' calls [utils::Rprofmem()], with the exception of such calls done via the
+#' \pkg{profmem} package itself.
+#'
+#' Any memory events that would occur due to calling any of the \pkg{profmem}
+#' functions themselves will _not_ be logged and _not_ be part of the returned
+#' profile data (regardless whether memory profiling is active or not).
+#'
+#' If a profmem profiling is already active, `profmem()` and `profmem_begin()`
+#' performs an _independent_, _nested_ profiling, which has no affect on the
+#' already active one.  When the active one completes, it will contain all
+#' memory events also collected by the nested profiling as if the nested one
+#' never occurred.
+#'
+#' @example incl/profmem.R
+#'
+#' @seealso
+#' Internally [utils::Rprofmem()] is used.
+#'
+#' @export
+#' @importFrom utils Rprofmem
+profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L) {
+  if (substitute) expr <- substitute(expr)
+
+  profmem_begin(threshold = threshold)
+  
+  ## Profile memory
+  error <- NULL
+  value <- tryCatch({
+    eval(expr, envir=envir)
+  }, error = function(ex) {
+    error <<- ex
+    NULL
+  })
+
+  pm <-  profmem_end()
+
+  ## Annotate
+  attr(pm, "expression") <- expr
+  attr(pm, "value") <- value
+  attr(pm, "error") <- error
+
+  pm
+} ## profmem()
+
+
+#' `profmem_begin()` starts the memory profiling of all the following \R
+#' evaluations until `profmem_end()` is called.
+#'
 #' @rdname profmem
 #' @export
-profmem_begin <- function(threshold = 0L, ...) {
+profmem_begin <- function(threshold = 0L) {
   ## Is memory profiling supported?
   if (!capableOfProfmem()) {
     msg <- "Profiling of memory allocations is not supported on this R system (capabilities('profmem') reports FALSE). See help('tracemem')."
@@ -166,7 +171,14 @@ profmem_end <- function() {
   data
 }
 
+#' `profmem_suspend()` suspends an active profiling until resumed by
+#' `profmem_resume()` or ended by `profmem_end()`.
+#' Calling `profmem_begin()` or `profmem()` will resume any suspended
+#' profiling; _nested_ resuming and suspending is _not_ supported.
+#' 
+#' @rdname profmem
 #' @importFrom utils Rprofmem
+#' @export
 profmem_suspend <- function() {
   ## Works regardless of active Rprofmem exists or not
   Rprofmem("")
@@ -184,8 +196,32 @@ profmem_suspend <- function() {
   invisible()
 }
 
+#' @rdname profmem
 #' @importFrom utils Rprofmem
+#' @export
 profmem_resume <- function(threshold = 0L) {
   pathname <- profmem_pathname()
   Rprofmem(filename = pathname, threshold = threshold)
+  invisible()
+}
+
+
+profmem_add_string <- function(msg, ...) {
+  pathname <- profmem_pathname()
+  if (getOption("profmem.debug", FALSE)) {
+    message("profmem_add_string(): pathname: ", pathname)
+    message("profmem_add_string(): exists: ", file_test("-f", pathname))
+  }
+  cat(msg, file = pathname, append = file_test("-f", pathname))
+}
+
+## FIXME: This produces lots of extra memory allocations, which
+## we don't want to inject.
+profmem_add_note <- function(..., timestamp = TRUE) {
+  msg <- sprintf(...)
+  if (timestamp) {
+    msg <- sprintf("[%s] %s", format(Sys.time(), "%Y%m%d-%H%M%S"), msg)
+  }
+  msg <- sprintf("# %s\n", msg)
+  profmem_add_string(msg)
 }
