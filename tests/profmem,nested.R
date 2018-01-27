@@ -4,6 +4,9 @@ message("profmem() - nested ...")
 
 p1 <- profmem({
   x <- integer(1000)
+  p2 <- profmem({
+    Y <- matrix(x, nrow = 100, ncol = 10)
+  })
   z <- Y + (x + 1)
 })
 
