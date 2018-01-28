@@ -43,7 +43,7 @@ c.Rprofmem <- function(...) {
   res <- data.frame(bytes = bytes, stringsAsFactors = FALSE)
   res$trace <- trace
   if (threshold > 0L) {
-    keep <- is.na(bytes) | (bytes <= threshold)
+    keep <- is.na(bytes) | (bytes >= threshold)
     stopifnot(all(is.finite(keep)))
     res <- res[keep, ]
   }
