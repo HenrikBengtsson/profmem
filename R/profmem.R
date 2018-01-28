@@ -13,7 +13,8 @@ profmem_stack <- local({
   
   stack <- list()
   
-  function(action = c("depth", "threshold", "push", "pop", "append"), data = empty, threshold = 0L) {
+  function(action = c("depth", "threshold", "push", "pop", "append"),
+           data = empty, threshold = 0L) {
     action <- match.arg(action)
     if (action == "depth") return(length(stack))
 
@@ -61,9 +62,6 @@ profmem_stack <- local({
 #      message("APPEND: stack depth: ", length(stack))
       return(invisible(value))
     }
-    
-
-    stop("Internal profmem error. Unknown 'action': ", action)
   }
 })
 
