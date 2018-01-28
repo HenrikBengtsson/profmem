@@ -70,7 +70,7 @@ profmem_stack <- local({
 #'
 #' `profmem()` evaluates and memory profiles an \R expression.
 #'
-#' @param expr An R expression to be evaluated and profiled.
+#' @param expr An \R expression to be evaluated and profiled.
 #' 
 #' @param envir The environment in which the expression should be evaluated.
 #' 
@@ -85,13 +85,27 @@ profmem_stack <- local({
 #' `profmem_suspend()` and `profmem_resume()` returns nothing.
 #'
 #' @details
-#' Profiling gathered by \pkg{profmem} _will_ be corrupted if the code profiled
-#' calls [utils::Rprofmem()], with the exception of such calls done via the
-#' \pkg{profmem} package itself.
+#' In order for memory profiling to work, \R must have been _built_ with memory
+#' profiling enabled.  Function
+#' \code{\link[base:capabilities]{base::capabilities("profmem")}} will
+#' return `TRUE` of it is enabled, otherwise `FALSE`.
+#' If memory profiling is _not_ supported, `profmem()` and `profmem_begin()`
+#' will produce an informative error.  The pre-built \R binaries on
+#' [CRAN](https://cran.r-project.org/) support memory profiling.
+#'
+#' What is logged?  The `profmem()` function uses [utils::Rprofmem()] for
+#' logging memory, which logs all memory _allocations_ that are done via the
+#' \R framework.  Specifically, the logger is tied to `allocVector3()` part
+#' of \R's native API.  This means that nearly all memory allocations done
+#' in \R are logged. _Neither_ memory deallocations _nor_ garbage collection
+#' events are logged.  Furthermore, allocations done by non-\R native libraries
+#' or \R packages that use native code `Calloc() / Free()` for internal objects
+#' are also _not_ logged.
 #'
 #' Any memory events that would occur due to calling any of the \pkg{profmem}
 #' functions themselves will _not_ be logged and _not_ be part of the returned
 #' profile data (regardless whether memory profiling is active or not).
+#' This is intentional.
 #'
 #' If a profmem profiling is already active, `profmem()` and `profmem_begin()`
 #' performs an _independent_, _nested_ profiling, which has no affect on the
@@ -99,10 +113,12 @@ profmem_stack <- local({
 #' memory events also collected by the nested profiling as if the nested one
 #' never occurred.
 #'
-#' @example incl/profmem.R
+#' Profiling gathered by \pkg{profmem} _will_ be corrupted if the code profiled
+#' calls [utils::Rprofmem()], with the exception of such calls done via the
+#' \pkg{profmem} package itself.
 #'
-#' @seealso
-#' Internally [utils::Rprofmem()] is used.
+#'
+#' @example incl/profmem.R
 #'
 #' @export
 #' @importFrom utils Rprofmem

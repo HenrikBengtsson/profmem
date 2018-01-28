@@ -19,7 +19,7 @@ profmem_suspend()
 profmem_resume()
 }
 \arguments{
-\item{expr}{An R expression to be evaluated and profiled.}
+\item{expr}{An \R expression to be evaluated and profiled.}
 
 \item{envir}{The environment in which the expression should be evaluated.}
 
@@ -45,19 +45,37 @@ Calling \code{profmem_begin()} or \code{profmem()} will resume any suspended
 profiling; \emph{nested} resuming and suspending is \emph{not} supported.
 }
 \details{
-Profiling gathered by \pkg{profmem} \emph{will} be corrupted if the code profiled
-calls \code{\link[utils:Rprofmem]{utils::Rprofmem()}}, with the exception of such calls done via the
-\pkg{profmem} package itself.
+In order for memory profiling to work, \R must have been \emph{built} with memory
+profiling enabled.  Function
+\code{\link[base:capabilities]{base::capabilities("profmem")}} will
+return \code{TRUE} of it is enabled, otherwise \code{FALSE}.
+If memory profiling is \emph{not} supported, \code{profmem()} and \code{profmem_begin()}
+will produce an informative error.  The pre-built \R binaries on
+\href{https://cran.r-project.org/}{CRAN} support memory profiling.
+
+What is logged?  The \code{profmem()} function uses \code{\link[utils:Rprofmem]{utils::Rprofmem()}} for
+logging memory, which logs all memory \emph{allocations} that are done via the
+\R framework.  Specifically, the logger is tied to \code{allocVector3()} part
+of \R's native API.  This means that nearly all memory allocations done
+in \R are logged. \emph{Neither} memory deallocations \emph{nor} garbage collection
+events are logged.  Furthermore, allocations done by non-\R native libraries
+or \R packages that use native code \code{Calloc() / Free()} for internal objects
+are also \emph{not} logged.
 
 Any memory events that would occur due to calling any of the \pkg{profmem}
 functions themselves will \emph{not} be logged and \emph{not} be part of the returned
 profile data (regardless whether memory profiling is active or not).
+This is intentional.
 
 If a profmem profiling is already active, \code{profmem()} and \code{profmem_begin()}
 performs an \emph{independent}, \emph{nested} profiling, which has no affect on the
 already active one.  When the active one completes, it will contain all
 memory events also collected by the nested profiling as if the nested one
 never occurred.
+
+Profiling gathered by \pkg{profmem} \emph{will} be corrupted if the code profiled
+calls \code{\link[utils:Rprofmem]{utils::Rprofmem()}}, with the exception of such calls done via the
+\pkg{profmem} package itself.
 }
 \examples{
 if (capabilities("profmem")) {
@@ -65,7 +83,7 @@ if (capabilities("profmem")) {
 ## Memory profile an R expression
 p <- profmem({
   x <- raw(1000)
-  A <- matrix(rnorm(100), ncol=10)
+  A <- matrix(rnorm(100), ncol = 10)
 })
 
 ## Display the results
@@ -83,7 +101,4 @@ str(x)
 str(A)
 
 }
-}
-\seealso{
-Internally \code{\link[utils:Rprofmem]{utils::Rprofmem()}} is used.
 }

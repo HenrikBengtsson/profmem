@@ -31,6 +31,9 @@ DOCUMENTATION:
    can make a difference' due to improvements in R (>= 3.4.0), which made the
    previous example no longer valid.
 
+ o help("profmem") how provide much more details previously only available
+   in the vignette.
+
 BUG FIX:
 
  o readRprofmem() failed to "workaround" another buggy Rprofmem() output.
