@@ -22,16 +22,25 @@ nrow.Rprofmem <- function(x) {
 #' @export
 c.Rprofmem <- function(...) {
   args <- list(...)
+  
   bytes <- NULL
   trace <- NULL
+  threshold <- NULL
+  
   for (arg in args) {
     stopifnot(inherits(arg, "Rprofmem"))
     bytes <- c(bytes, arg$bytes)
     trace <- c(trace, arg$trace)
+    threshold <- c(threshold, attr(arg, "threshold"))
   }
-
+  threshold <- max(threshold)
+  stopifnot(length(threshold) == 1, is.finite(threshold),
+            is.integer(threshold), threshold >= 0L)
+  
   res <- data.frame(bytes = bytes, stringsAsFactors = FALSE)
   res$trace <- trace
+  res <- res[bytes <= threshold, ]
+  attr(res, "threshold") <- threshold
   class(res) <- c("Rprofmem", class(res))
   
   res
@@ -41,6 +50,7 @@ c.Rprofmem <- function(...) {
 subset.Rprofmem <- function(x, ...) {
   res <- NextMethod("subset")
   attr(res, "expression") <- attr(x, "expression")
+  attr(res, "threshold") <- attr(x, "threshold")
   res
 }
 
@@ -72,7 +82,13 @@ print.Rprofmem <- function(x, ...) {
     cat("Rprofmem memory profiling:\n")
   }
 
-  cat("\nMemory allocations:\n")
+  threshold <- attr(x, "threshold")
+  if (is.null(threshold)) {
+    cat("\nMemory allocations:\n")
+  } else {
+    cat(sprintf("\nMemory allocations (>= %g bytes):\n", threshold))
+  }
+  
   data <- as.data.frame(x)
   n <- nrow(data)
   total <- sum(data$bytes, na.rm=TRUE)

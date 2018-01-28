@@ -9,16 +9,25 @@ profmem_pathname <- local({
 
 profmem_stack <- local({
   empty <- data.frame(bytes = NULL, trace = NULL, stringsAsFactors = FALSE)
-  empty <- structure(empty, class = c("Rprofmem", "data.frame"))
+  empty <- structure(empty, class = c("Rprofmem", "data.frame"), threshold = 0L)
   
   stack <- list()
   
-  function(action = c("depth", "push", "pop", "append"), data = empty) {
+  function(action = c("depth", "threshold", "push", "pop", "append"), data = empty, threshold = 0L) {
     action <- match.arg(action)
     if (action == "depth") return(length(stack))
 
+    if (action == "threshold") {
+      if (length(stack) == 0) return(NA_integer_)
+      threshold <- attr(stack[[1]], "threshold")
+      return(threshold)
+    }
+    
     if (action == "push") {
-      stopifnot(inherits(data, "Rprofmem"))
+      stopifnot(inherits(data, "Rprofmem"),
+                length(threshold) == 1, is.finite(threshold),
+                is.integer(threshold), threshold >= 0L)
+      attr(data, "threshold") <- threshold
       stack <<- c(stack, list(data))
 #      message("PUSH: stack depth: ", length(stack))
       return(length(stack))
@@ -42,7 +51,10 @@ profmem_stack <- local({
     if (action == "append") {
       depth <- length(stack)
       if (depth == 0) stop("Cannot 'append' - profmem stack is empty")
-      stopifnot(inherits(data, "Rprofmem"))
+      stopifnot(inherits(data, "Rprofmem"),
+                length(threshold) == 1, is.finite(threshold),
+                is.integer(threshold), threshold >= 0L)
+      attr(data, "threshold") <- threshold
       value <- stack[[depth]]
       value <- if (is.null(value)) data else c(value, data)
       stack[[depth]] <<- value
@@ -136,17 +148,29 @@ profmem_begin <- function(threshold = 0L) {
     stop(msg)
   }
 
-  profmem_suspend()
-    
-  if (getOption("profmem.debug", FALSE)) {
-    message("profmem_begin(): stack depth: ", profmem_stack("depth"))
+  threshold <- as.integer(threshold)
+  stopifnot(length(threshold) == 1, is.finite(threshold), threshold >= 0L)
+
+  depth <- profmem_stack("depth")
+  if (depth > 0) {
+    threshold_parent <- profmem_stack("threshold")
+    if (threshold > threshold_parent) {
+      threshold <- threshold_parent
+      warning(sprintf("Nested profmem threshold (%d bytes) cannot be greater than the threshold (%d bytes) of an active profmem session. Will use the active threshold instead.", threshold, threshold_parent))
+    }
   }
   
+  profmem_suspend()
+   
+  if (getOption("profmem.debug", FALSE)) {
+    message("profmem_begin(): stack depth: ", depth)
+  }
+ 
   ## Push new level
-  depth <- profmem_stack("push")
-  
-  profmem_resume(threshold = threshold)
-  
+  depth <- profmem_stack("push", threshold = threshold)
+ 
+  profmem_resume()
+ 
   invisible(depth)
 }
 
@@ -190,6 +214,7 @@ profmem_suspend <- function() {
   drop <- length(sys.calls()) + 4L
   pathname <- profmem_pathname()
   data <- readRprofmem(pathname, drop = drop, as = "Rprofmem")
+  attr(data, "threshold") <- profmem_stack("threshold")
   if (getOption("profmem.debug", FALSE)) mstr(data)
   profmem_stack("append", data)
 
@@ -199,7 +224,8 @@ profmem_suspend <- function() {
 #' @rdname profmem
 #' @importFrom utils Rprofmem
 #' @export
-profmem_resume <- function(threshold = 0L) {
+profmem_resume <- function() {
+  threshold <- profmem_stack("threshold")
   pathname <- profmem_pathname()
   Rprofmem(filename = pathname, threshold = threshold)
   invisible()

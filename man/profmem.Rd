@@ -16,7 +16,7 @@ profmem_end()
 
 profmem_suspend()
 
-profmem_resume(threshold = 0L)
+profmem_resume()
 }
 \arguments{
 \item{expr}{An R expression to be evaluated and profiled.}

@@ -1,7 +1,7 @@
 Package: profmem
 ================
 
-Version: 0.4.0-9000 [2018-01-27]
+Version: 0.4.0-9000 [2018-01-28]
 
 SIGNIFICANT CHANGES:
 
@@ -17,6 +17,8 @@ NEW FEATURES:
  o Added profmem_suspend() and profmem_resume() for suspending and resuming
    an active profmem session.
 
+ o print() for Rprofmem objects now reports on the threshold used, if known.
+   
  o nrow() on an Rprofmem object now gives the number of allocations.
 
 DOCUMENTATION:
