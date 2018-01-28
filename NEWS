@@ -27,9 +27,9 @@ NEW FEATURES:
 
 DOCUMENTATION:
 
- o VIGNETTE: The microbenchmark paragraph incorrectly claimed that the
-   difference is also due to the garbage collection; it is most likely only
-   due to the coercion of integer to double.
+ o VIGNETTE: Updated the example in Section 'An example where memory profiling
+   can make a difference' due to improvements in R (>= 3.4.0), which made the
+   previous example no longer valid.
 
 BUG FIX:
 

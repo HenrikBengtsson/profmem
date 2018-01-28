@@ -36,85 +36,66 @@ Finally, the last entry reflects the memory allocation of NA bytes done by `matr
 
 ## An example where memory profiling can make a difference
 
-Assume we have an integer vector
+Assume we want to set a 100-by-100 matrix with missing values except for element (1,1) that we assign to be zero.  This can be done as:
 ```r
-> x <- sample(1:10000, size = 10000)
-> str(x)
- int [1:10000] 7148 9595 741 1573 4829 4405 1459 17 2857 9193 ...
+> x <- matrix(nrow = 100, ncol = 100)
+> x[1, 1] <- 0
+> x[1:3, 1:3]
+     [,1] [,2] [,3]
+[1,]    0   NA   NA
+[2,]   NA   NA   NA
+[3,]   NA   NA   NA
 ```
-and we would like to identify all elements less than 5000.  Then we can use
-```r
-> small <- (x < 5000)
-> str(small)
- logi [1:10000] FALSE FALSE TRUE TRUE TRUE TRUE ...
-```
-This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
-```r
-> typeof(x)
-[1] "integer"
-> typeof(5000)
-[1] "double"
-```
-Because of this difference in types, R chooses to first coerce `x` into a double vector before comparing with another double (here `5000`).  Having to coerce to another data type consumes extra memory, which we can see if we profile the memory:
+This looks fairly innocent, but it turns out that it is very inefficient - both when it comes to memory and speed.  The reason is that the default value used by `matrix()` is `NA`, which is of type _logical_.  This means that initially `x` is a _logical_ matrix not a _numeric_ matrix.  When we the assign the (1,1) element the value `0`, which is a _numeric_, the matrix first has to be coerced to _numeric_ internally and then the zero is assigned.  Profiling the memory will reveal this;
+
+
 ```r
 > p <- profmem({
-+     small <- (x < 5000)
++     x <- matrix(nrow = 100, ncol = 100)
++     x[1, 1] <- 0
 + })
-> p
-Rprofmem memory profiling of:
-{
-    small <- (x < 5000)
-}
+> print(p, expr = FALSE)
 Memory allocations (>= 1000 bytes):
-      bytes      calls
-1     40040 <internal>
-total 40040           
+       bytes      calls
+1      40040   matrix()
+2      80040 <internal>
+total 120080           
 ```
-But before anything else, the sizes of `x` and `small` are:
-```r
-> object.size(x)
-40040 bytes
-> object.size(small)
-40040 bytes
-```
-which is because `x` is of type integer (4 bytes per element) and `small` is of type logical (also 4 bytes per element).
+The first entry is for the logical matrix with 10,000 elements (= 4 \* 10,000 bytes + small header) that we allocate.  The second entry reveals the coercion of this matrix to a numeric matrix (= 8 \* 10,000 elements + small header).
 
-Now, due the coercion of `x` to double, an internal double vector of the same length as `x` is temporarily created (and populated with values from `x`).  This is what is reported in the first row of `p`.  Since each double value occupies 8 bytes of memory, the size of this internal object is 40040 bytes.
-At this point, R is ready to compare the internal double vector against the double value `5000`.  The result of this comparison will be stored in a logical vector of length 10000.  This is what is reported in the second row of `p`.  This logical vector is assigned to variable `small` at the end.
-
-We can avoid the coercion to double if we compare `x` to an integer value (`5000L`) instead of a double value (`5000`), which is also confirmed if we profile memory allocations;
+To avoid this, we make sure to create a numeric matrix upfront as:
 ```r
-> p2 <- profmem({
-+     small <- (x < 5000L)
+> p <- profmem({
++     x <- matrix(NA_real_, nrow = 100, ncol = 100)
++     x[1, 1] <- 0
 + })
-> p2
-Rprofmem memory profiling of:
-{
-    small <- (x < 5000L)
-}
+> print(p, expr = FALSE)
 Memory allocations (>= 1000 bytes):
-      bytes      calls
-1     40040 <internal>
-total 40040           
+      bytes    calls
+1     80040 matrix()
+total 80040         
 ```
-In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
 
 Using the [microbenchmark] package, we can also quantify the extra overhead in processing time that is introduced due to the coercion of `x` to double;
 ```r
 > library("microbenchmark")
-> stats <- microbenchmark(double = (x < 5000), integer = (x < 
-+     5000L), times = 100, unit = "ms")
+> stats <- microbenchmark(bad = {
++     x <- matrix(nrow = 100, ncol = 100)
++     x[1, 1] <- 0
++ }, good = {
++     x <- matrix(NA_real_, nrow = 100, ncol = 100)
++     x[1, 1] <- 0
++ }, times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq   max neval cld
-  double 0.024 0.035 0.035  0.035 0.036 0.042   100   b
- integer 0.016 0.027 0.027  0.028 0.029 0.034   100  a 
+ expr   min    lq  mean median    uq  max neval cld
+  bad 0.015 0.016 0.038  0.016 0.051 0.83   100   a
+ good 0.010 0.011 0.025  0.011 0.035 0.50   100   a
 ```
-Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
+The ineffcient approach is 1.5-2 times slower than the efficient one.
 
 
 The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.
-
 
 
 
