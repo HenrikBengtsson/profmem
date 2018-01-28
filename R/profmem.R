@@ -153,8 +153,8 @@ profmem_begin <- function(threshold = 0L) {
   if (depth > 0) {
     threshold_parent <- profmem_stack("threshold")
     if (threshold > threshold_parent) {
+      warning(sprintf("Nested profmem threshold (%d bytes) cannot be greater than the threshold (%d bytes) of active profmem sessions (n = %d). Will use the active threshold instead.", threshold, threshold_parent, depth))
       threshold <- threshold_parent
-      warning(sprintf("Nested profmem threshold (%d bytes) cannot be greater than the threshold (%d bytes) of an active profmem session. Will use the active threshold instead.", threshold, threshold_parent))
     }
   }
   

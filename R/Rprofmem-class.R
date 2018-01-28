@@ -42,7 +42,11 @@ c.Rprofmem <- function(...) {
   
   res <- data.frame(bytes = bytes, stringsAsFactors = FALSE)
   res$trace <- trace
-  res <- res[bytes <= threshold, ]
+  if (threshold > 0L) {
+    keep <- is.na(bytes) | (bytes <= threshold)
+    stopifnot(all(is.finite(keep)))
+    res <- res[keep, ]
+  }
   attr(res, "threshold") <- threshold
   class(res) <- c("Rprofmem", class(res))
   ## Sanity check
