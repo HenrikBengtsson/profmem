@@ -2,6 +2,7 @@
 
 S3method(as.data.frame,Rprofmem)
 S3method(c,Rprofmem)
+S3method(dim,Rprofmem)
 S3method(print,Rprofmem)
 S3method(subset,Rprofmem)
 S3method(total,Rprofmem)
