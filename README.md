@@ -26,12 +26,12 @@ Number of NA entries not displayed: 6
 6      80040 matrix() -> rnorm()
 7       2544 matrix() -> rnorm()
 8      80040            matrix()
-9       1064          <internal>
+10      1064          <internal>
 total 167728                    
 ```
-From this, we find that NA bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
-We also see that `rnorm()`, which is called via `matrix()`, allocates NA + NA bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
-Finally, the last entry reflects the memory allocation of 4040 bytes done by `matrix()` itself.
+From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
+We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
+Finally, the last entry reflects the memory allocation of 80040 bytes done by `matrix()` itself.
 
 
 ## An example where memory profiling can make a difference
@@ -89,8 +89,8 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 > stats
 Unit: milliseconds
  expr   min    lq  mean median    uq  max neval cld
-  bad 0.015 0.016 0.039  0.016 0.051 0.83   100   a
- good 0.010 0.011 0.026  0.011 0.034 0.57   100   a
+  bad 0.015 0.016 0.038  0.016 0.050 0.84   100   a
+ good 0.010 0.011 0.026  0.011 0.034 0.54   100   a
 ```
 The ineffcient approach is 1.5-2 times slower than the efficient one.
 

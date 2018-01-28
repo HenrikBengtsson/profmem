@@ -57,9 +57,10 @@ p <- profmem({
 p
 })%>
 ```
+<% p <- na.omit(p) %>
 From this, we find that <%= p$bytes[1] %> bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
 We also see that `rnorm()`, which is called via `matrix()`, allocates <%= p$bytes[2] %> + <%= p$bytes[3] %> bytes, where the first one reflects the <%= length(Y) %> double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
-Finally, the last entry reflects the memory allocation of <%= p$bytes[4] %> bytes done by `matrix()` itself.
+Finally, the following entry reflects the memory allocation of <%= p$bytes[4] %> bytes done by `matrix()` itself.
 <% } else { %>
 
 **WARNING: This vignette was compiled with an R version that was built with memory profiling disabled, cf. `capabilities('profmem')`.  Please redo!**
