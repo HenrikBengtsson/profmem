@@ -2,6 +2,7 @@ Package: profmem
 Version: 0.4.0-9000
 Title: Simple Memory Profiling for R
 Imports:
+    stats,
     utils
 Suggests:
     R.rsp,
