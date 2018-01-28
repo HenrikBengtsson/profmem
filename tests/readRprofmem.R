@@ -27,6 +27,12 @@ print(p)
 str(p)
 stopifnot(nrow(p) == length(fixed))
 
+p <- readRprofmem(broken, as = "profmem")
+cat("readRprofmem(broken, as = 'profmem'):\n")
+print(p)
+str(p)
+stopifnot(nrow(p) == length(fixed))
+
 
 if (capabilities("profmem")) {
   
@@ -59,6 +65,12 @@ if (capabilities("profmem")) {
   str(p)
   stopifnot(nrow(p) == length(fixed))
 
+  p <- readRprofmem(live, as = "profmem")
+  cat("readRprofmem(live, as = 'profmem'):\n")
+  print(p)
+  str(p)
+  stopifnot(nrow(p) == length(fixed))
+  
 } ## if (capabilities("profmem"))
 
 message("readRprofmem() ... DONE")

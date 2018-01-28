@@ -63,7 +63,7 @@ profmem_stack <- local({
     }
     
 
-    stop("Unknown 'action': ", action)
+    stop("Internal profmem error. Unknown 'action': ", action)
   }
 })
 
@@ -205,7 +205,7 @@ profmem_suspend <- function() {
   ## Import current log
   drop <- length(sys.calls()) + 4L
   pathname <- profmem_pathname()
-  data <- readRprofmem(pathname, drop = drop, as = "Rprofmem")
+  data <- readRprofmem(pathname, drop = drop, as = "profmem")
   attr(data, "threshold") <- profmem_stack("threshold")
   profmem_stack("append", data)
 
@@ -223,18 +223,20 @@ profmem_resume <- function() {
 }
 
 
-profmem_add_string <- function(msg, ...) {
-  pathname <- profmem_pathname()
-  cat(msg, file = pathname, append = file_test("-f", pathname))
-}
-
-## FIXME: This produces lots of extra memory allocations, which
-## we don't want to inject.
-profmem_add_note <- function(..., timestamp = TRUE) {
-  msg <- sprintf(...)
-  if (timestamp) {
-    msg <- sprintf("[%s] %s", format(Sys.time(), "%Y%m%d-%H%M%S"), msg)
-  }
-  msg <- sprintf("# %s\n", msg)
-  profmem_add_string(msg)
-}
+### TODO:
+###
+### profmem_add_string <- function(msg, ...) {
+###   pathname <- profmem_pathname()
+###   cat(msg, file = pathname, append = file_test("-f", pathname))
+### }
+### 
+### ## FIXME: This produces lots of extra memory allocations, which
+### ## we don't want to inject.
+### profmem_add_note <- function(..., timestamp = TRUE) {
+###   msg <- sprintf(...)
+###   if (timestamp) {
+###     msg <- sprintf("[%s] %s", format(Sys.time(), "%Y%m%d-%H%M%S"), msg)
+###   }
+###   msg <- sprintf("# %s\n", msg)
+###   profmem_add_string(msg)
+### }

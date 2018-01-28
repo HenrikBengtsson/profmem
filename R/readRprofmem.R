@@ -26,7 +26,7 @@
 #'
 #' @export
 #' @importFrom utils file_test
-readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw"), drop = 0L, ...) {
+readRprofmem <- function(pathname, as = c("Rprofmem", "profmem", "fixed", "raw"), drop = 0L, ...) {
   stopifnot(file_test("-f", pathname))
   as <- match.arg(as)
   drop <- as.integer(drop)
