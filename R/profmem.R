@@ -162,10 +162,6 @@ profmem_begin <- function(threshold = 0L) {
   
   profmem_suspend()
    
-  if (getOption("profmem.debug", FALSE)) {
-    message("profmem_begin(): stack depth: ", depth)
-  }
- 
   ## Push new level
   depth <- profmem_stack("push", threshold = threshold)
  
@@ -185,10 +181,6 @@ profmem_end <- function() {
   }
 
   data <- profmem_stack("pop")
-
-  if (getOption("profmem.debug", FALSE)) {
-    message("profmem_end(): stack depth: ", profmem_stack("depth"))
-  }
 
   profmem_resume()
   
@@ -233,10 +225,6 @@ profmem_resume <- function() {
 
 profmem_add_string <- function(msg, ...) {
   pathname <- profmem_pathname()
-  if (getOption("profmem.debug", FALSE)) {
-    message("profmem_add_string(): pathname: ", pathname)
-    message("profmem_add_string(): exists: ", file_test("-f", pathname))
-  }
   cat(msg, file = pathname, append = file_test("-f", pathname))
 }
 
