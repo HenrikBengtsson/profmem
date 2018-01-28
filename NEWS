@@ -19,9 +19,9 @@ NEW FEATURES:
 
  o print() for Rprofmem now reports on the threshold used, if known.
 
- o print() for Rprofmem now defaults to reporting on NA entries by mentioning
-   how many there are, but not listing each of them seperately (as there can
-   be quite a few at times).  Use print(..., na.rm = FALSE) to display all.
+ o print() for Rprofmem gained arguments 'expr = TRUE' and 'na.rm = TRUE',
+   controlling whether the profiled R expression and NA entries should be
+   displayed or not.
 
  o nrow() on an Rprofmem object now gives the number of allocations.
 

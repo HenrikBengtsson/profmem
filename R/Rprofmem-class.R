@@ -83,25 +83,29 @@ as.data.frame.Rprofmem <- function(x, ...) {
 } ## as.data.frame()
 
 
-#' @param na.rm If `TRUE`, `NA` entries are dropped, otherwise not.
-#'
+## @param na.rm If `TRUE`, `NA` entries are dropped, otherwise not.
+##
 #' @importFrom stats na.omit
 #' @export
-print.Rprofmem <- function(x, na.rm = TRUE, ...) {
-  if ("expression" %in% names(attributes(x))) {
+print.Rprofmem <- function(x, expr = TRUE, na.rm = TRUE, ...) {
+  if (expr && "expression" %in% names(attributes(x))) {
     cat("Rprofmem memory profiling of:\n")
     print(attr(x, "expression"))
-  } else {
-    cat("Rprofmem memory profiling:\n")
+    cat("\n")
   }
 
   threshold <- attr(x, "threshold")
-  if (is.null(threshold)) {
-    cat("\nMemory allocations:\n")
+  if (is.null(threshold) || threshold == 0L) {
+    cat("Memory allocations:\n")
   } else {
-    cat(sprintf("\nMemory allocations (>= %g bytes):\n", threshold))
+    cat(sprintf("Memory allocations (>= %g bytes):\n", threshold))
   }
 
+  if (na.rm) {
+    nas <- sum(is.na(x$bytes))
+    if (nas > 0) cat(sprintf("Number of NA entries not displayed: %d\n", nas))
+  }
+  
   data <- as.data.frame(x, ...)
   if (na.rm) {
     data <- na.omit(data)
@@ -122,11 +126,6 @@ print.Rprofmem <- function(x, na.rm = TRUE, ...) {
   rownames(data)[n+1] <- "total"
 
   print(data, ...)
-
-  if (na.rm) {
-    nas <- sum(is.na(x$bytes))
-    cat(sprintf("Number of NA entries not displayed: %d\n", nas))
-  }
   
   invisible(x)
 } ## print()
