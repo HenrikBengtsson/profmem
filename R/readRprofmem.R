@@ -54,7 +54,7 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "profmem", "fixed", "raw")
 
   ## Parse Rprofmem results
   pattern <- "^([0-9]+|new page)[ ]?:(.*)"
-  bfr <- lapply(bfr, FUN=function(x) {
+  res <- lapply(bfr, FUN=function(x) {
     bytes <- gsub(pattern, "\\1", x)
     bytes[bytes == "new page"] <- ""  # Will become NA below w/out warning
     bytes <- as.numeric(bytes)
@@ -69,13 +69,21 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "profmem", "fixed", "raw")
     list(bytes=bytes, trace=trace)
   })
 
-  bytes <- unlist(lapply(bfr, FUN=function(x) x$bytes), use.names=FALSE)
-  traces <- lapply(bfr, FUN=function(x) x$trace)
+  if (length(res) == 0) {
+    bytes <- integer(0L)
+    traces <- list()
+  } else {
+    bytes <- unlist(lapply(res, FUN=function(x) x$bytes), use.names=FALSE)
+    traces <- lapply(res, FUN=function(x) x$trace)
+  }
   res <- data.frame(bytes=bytes, stringsAsFactors=FALSE)
   res$trace <- traces
   bfr <- bytes <- traces <- NULL
   
   class(res) <- c("Rprofmem", class(res))
 
+  ## Sanity check
+  stopifnot(c("bytes", "trace") %in% names(res))
+  
   res
 } ## readRprofmem()

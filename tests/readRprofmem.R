@@ -2,6 +2,8 @@ library("profmem")
 
 message("readRprofmem() ...")
 
+message(" - corrupt file")
+
 broken <- system.file("extdata", "broken.Rprofile.out", package = "profmem")
 
 bfr <- readLines(broken)
@@ -16,8 +18,8 @@ stopifnot(
   all(raw == bfr)
 )
 
+message("readRprofmem(broken, as = 'fixed'):\n")
 fixed <- readRprofmem(broken, as = "fixed")
-cat("readRprofmem(broken, as = 'fixed'):\n")
 print(fixed)
 stopifnot(length(fixed) >= length(bfr))
 
@@ -31,7 +33,28 @@ p <- readRprofmem(broken, as = "profmem")
 cat("readRprofmem(broken, as = 'profmem'):\n")
 print(p)
 str(p)
-stopifnot(nrow(p) == length(fixed))
+stopifnot(nrow(p) >= length(fixed))
+
+
+message(" - empty file")
+
+empty <- tempfile()
+writeLines(character(0L), con = empty)
+
+bfr <- readLines(empty)
+stopifnot(length(bfr) == 0)
+
+raw <- readRprofmem(empty, as = "raw")
+stopifnot(is.character(raw), length(raw) == 0)
+
+fixed <- readRprofmem(empty, as = "fixed")
+stopifnot(is.character(raw), length(raw) == 0)
+
+p <- readRprofmem(empty, as = "Rprofmem")
+stopifnot(nrow(p) == 0L)
+
+p <- readRprofmem(empty, as = "profmem")
+stopifnot(nrow(p) == 0L)
 
 
 if (capabilities("profmem")) {

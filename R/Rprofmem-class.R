@@ -16,7 +16,10 @@ total.Rprofmem <- function(x, ...) {
 }
 
 dim.Rprofmem <- function(x) {
-  c(length(x$bytes), 2L)
+  nrow <- length(x$bytes)
+  ## Sanity check
+  stopifnot(length(nrow) == 1L, is.finite(nrow), nrow >= 0L)
+  c(nrow, 2L)
 }
 
 #' @export
@@ -42,6 +45,8 @@ c.Rprofmem <- function(...) {
   res <- res[bytes <= threshold, ]
   attr(res, "threshold") <- threshold
   class(res) <- c("Rprofmem", class(res))
+  ## Sanity check
+  stopifnot(c("bytes", "trace") %in% names(res))
   
   res
 }
