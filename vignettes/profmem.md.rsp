@@ -169,10 +169,10 @@ capabilities('profmem')
 ```
 The overhead of running an R installation with memory profiling enabled compared to one without is neglectable / non-measurable.
 
-Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, [it has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R binaries for Windows, the ones from the Ubuntu Linux distribution, and the nightly builds for macOS by the AT&T Research Lab have all been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the other macOS binaries, but this has to be confirmed.
+Volunteers of the R Project provide and distribute pre-built binaries of the R software for all the major operating system via [CRAN].  [It has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R binaries for Windows, macOS (both by CRAN and by the AT&T Research Lab), and for Linux (\*) all have been built with memory profiling enabled.  (\*) For Linux, this has been confirmed for the Debian/Ubuntu distribution but yet not for the other Linux distributions.
 
 
-To enable memory profiling, which is _only_ needed if `capabilities("profmem")` returns `FALSE`, R needs to be _configured_ and _built_ from source using:
+In all other cases, to enable memory profiling, which is _only_ needed if `capabilities("profmem")` returns `FALSE`, R needs to be _configured_ and _built from source_ using:
 ```sh
 $ ./configure --enable-memory-profiling
 $ make
@@ -181,6 +181,7 @@ For more information, please see the 'R Installation and Administration' documen
 
 
 
+[CRAN]: https://cran.r-project.org/
 [profmem]: https://cran.r-project.org/package=profmem
 [microbenchmark]: https://cran.r-project.org/package=microbenchmark
 

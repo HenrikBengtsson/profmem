@@ -19,18 +19,19 @@ Rprofmem memory profiling of:
     x <- integer(1000)
     Y <- matrix(rnorm(n = 10000), nrow = 100)
 }
-Memory allocations:
+Memory allocations (>= 1000 bytes):
+Number of NA entries not displayed: 7
        bytes               calls
-1       4040           integer()
-2      80040 matrix() -> rnorm()
-3       2544 matrix() -> rnorm()
-4      80040            matrix()
-5       1064          <internal>
+5       4040           integer()
+6      80040 matrix() -> rnorm()
+7       2544 matrix() -> rnorm()
+9      80040            matrix()
+10      1064          <internal>
 total 167728                    
 ```
-From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
-We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
-Finally, the last entry reflects the memory allocation of 80040 bytes done by `matrix()` itself.
+From this, we find that NA bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
+We also see that `rnorm()`, which is called via `matrix()`, allocates NA + NA bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
+Finally, the last entry reflects the memory allocation of NA bytes done by `matrix()` itself.
 
 
 ## An example where memory profiling can make a difference
@@ -64,7 +65,7 @@ Rprofmem memory profiling of:
 {
     small <- (x < 5000)
 }
-Memory allocations:
+Memory allocations (>= 1000 bytes):
       bytes      calls
 1     40040 <internal>
 total 40040           
@@ -91,13 +92,9 @@ Rprofmem memory profiling of:
 {
     small <- (x < 5000L)
 }
-Memory allocations:
+Memory allocations (>= 1000 bytes):
       bytes      calls
-1        NA <internal>
-2        NA <internal>
-3        NA <internal>
-4     40040 <internal>
-5        NA <internal>
+1     40040 <internal>
 total 40040           
 ```
 In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
@@ -110,8 +107,8 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 > stats
 Unit: milliseconds
     expr   min    lq  mean median    uq   max neval cld
-  double 0.041 0.048 0.053  0.051 0.056 0.090   100   b
- integer 0.029 0.040 0.045  0.043 0.051 0.058   100  a 
+  double 0.024 0.035 0.035  0.035 0.036 0.042   100   b
+ integer 0.016 0.027 0.027  0.028 0.029 0.034   100  a 
 ```
 Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
 
@@ -140,10 +137,10 @@ profmem
 ```
 The overhead of running an R installation with memory profiling enabled compared to one without is neglectable / non-measurable.
 
-Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, [it has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R binaries for Windows, the ones from the Ubuntu Linux distribution, and the nightly builds for macOS by the AT&T Research Lab have all been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the other macOS binaries, but this has to be confirmed.
+Volunteers of the R Project provide and distribute pre-built binaries of the R software for all the major operating system via [CRAN].  [It has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R binaries for Windows, macOS (both by CRAN and by the AT&T Research Lab), and for Linux (\*) all have been built with memory profiling enabled.  (\*) For Linux, this has been confirmed for the Debian/Ubuntu distribution but yet not for the other Linux distributions.
 
 
-To enable memory profiling, which is _only_ needed if `capabilities("profmem")` returns `FALSE`, R needs to be _configured_ and _built_ from source using:
+In all other cases, to enable memory profiling, which is _only_ needed if `capabilities("profmem")` returns `FALSE`, R needs to be _configured_ and _built from source_ using:
 ```sh
 $ ./configure --enable-memory-profiling
 $ make
@@ -152,6 +149,7 @@ For more information, please see the 'R Installation and Administration' documen
 
 
 
+[CRAN]: https://cran.r-project.org/
 [profmem]: https://cran.r-project.org/package=profmem
 [microbenchmark]: https://cran.r-project.org/package=microbenchmark
 
