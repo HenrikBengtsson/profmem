@@ -47,8 +47,6 @@ readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw")
 
   if (as == "fixed") return(bfr)
 
-  if (getOption("profmem.debug", FALSE)) writeLines(bfr)
-  
   ## Drop comments
   if (as == "profmem") {
     bfr <- grep("^#", bfr, value = TRUE, invert = TRUE)
@@ -65,11 +63,6 @@ readRprofmem <- function(pathname, as = c("profmem", "Rprofmem", "fixed", "raw")
     trace <- gsub('" "', '", "', trace, fixed=TRUE)
     trace <- sprintf("c(%s)", trace)
   
-    if (getOption("profmem.debug", FALSE)) {
-      message(bytes, ": ", trace)
-      message("drop: ", drop)
-    }
-    
     trace <- eval(parse(text=trace))
     trace <- trace[seq_len(max(0L, length(trace)-drop))]
 

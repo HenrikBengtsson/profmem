@@ -15,8 +15,8 @@ total.Rprofmem <- function(x, ...) {
   sum(x$bytes, na.rm=TRUE)
 }
 
-nrow.Rprofmem <- function(x) {
-  length(x$bytes)
+dim.Rprofmem <- function(x) {
+  c(length(x$bytes), 2L)
 }
 
 #' @export

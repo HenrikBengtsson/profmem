@@ -215,7 +215,6 @@ profmem_suspend <- function() {
   pathname <- profmem_pathname()
   data <- readRprofmem(pathname, drop = drop, as = "Rprofmem")
   attr(data, "threshold") <- profmem_stack("threshold")
-  if (getOption("profmem.debug", FALSE)) mstr(data)
   profmem_stack("append", data)
 
   invisible()
