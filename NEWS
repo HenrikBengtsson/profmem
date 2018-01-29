@@ -23,8 +23,6 @@ NEW FEATURES:
    controlling whether the profiled R expression and 'new page' entries should
    be displayed or not.
 
- o nrow() on an Rprofmem object now gives the number of allocations.
-
 DOCUMENTATION:
 
  o VIGNETTE: Updated the example in Section 'An example where memory profiling

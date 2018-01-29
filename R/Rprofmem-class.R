@@ -16,14 +16,6 @@ total.Rprofmem <- function(x, ...) {
 }
 
 #' @export
-dim.Rprofmem <- function(x) {
-  nrow <- length(x$bytes)
-  ## Sanity check
-  stopifnot(length(nrow) == 1L, is.finite(nrow), nrow >= 0L)
-  c(nrow, 3L)
-}
-
-#' @export
 c.Rprofmem <- function(...) {
   args <- list(...)
   
