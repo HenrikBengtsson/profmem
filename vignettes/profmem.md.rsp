@@ -24,8 +24,7 @@ set.seed(0xBEEF) ## Just to minimize diff when rebuilt
 
 ## WORKAROUND: Avoid spurious memory allocations that occurs
 ## occassional when running in a fresh R session
-profmem <- profmem::profmem
-formals(profmem)$threshold <- 1000L
+options(profmem.threshold = 1000)
 
 ## Initiate the random number generator, because otherwise it will
 ## be done and captured during the first profiling below.  It is not
@@ -49,6 +48,7 @@ For example,
 ```r
 <%=withCapture({
 library("profmem")
+options(profmem.threshold = 2000)
 
 p <- profmem({
   x <- integer(1000)

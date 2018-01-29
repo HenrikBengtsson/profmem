@@ -51,7 +51,7 @@
 #'
 #' @export
 #' @importFrom utils Rprofmem
-profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold = 0L) {
+profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold = getOption("profmem.threshold", 0L)) {
   if (substitute) expr <- substitute(expr)
 
   profmem_begin(threshold = threshold)
@@ -84,7 +84,7 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
 #' 
 #' @rdname profmem
 #' @export
-profmem_begin <- function(threshold = 0L) {
+profmem_begin <- function(threshold = getOption("profmem.threshold", 0L)) {
   ## Is memory profiling supported?
   if (!capableOfProfmem()) {
     msg <- "Profiling of memory allocations is not supported on this R system (capabilities('profmem') reports FALSE). See help('tracemem')."

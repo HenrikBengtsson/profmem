@@ -28,6 +28,9 @@ NEW FEATURES:
    controlling whether the profiled R expression and 'new page' entries should
    be displayed or not.
 
+ o Added option 'future.threshold' for controlling the default threshold level
+   for profmem() and profmem_begin().
+
 DOCUMENTATION:
 
  o VIGNETTE: Updated the example in Section 'An example where memory profiling

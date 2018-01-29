@@ -9,6 +9,7 @@ For example,
 
 ```r
 > library("profmem")
+> options(profmem.threshold = 2000)
 > p <- profmem({
 +     x <- integer(1000)
 +     Y <- matrix(rnorm(n = 10000), nrow = 100)
@@ -19,15 +20,14 @@ Rprofmem memory profiling of:
     x <- integer(1000)
     Y <- matrix(rnorm(n = 10000), nrow = 100)
 }
-Memory allocations (>= 1000 bytes):
-Number of 'new page' entries not displayed: 10
+Memory allocations (>= 2000 bytes):
+Number of 'new page' entries not displayed: 9
        what  bytes               calls
 7     alloc   4040           integer()
 9     alloc  80040 matrix() -> rnorm()
 10    alloc   2544 matrix() -> rnorm()
 11    alloc  80040            matrix()
-13    alloc   1064          <internal>
-total       167728                    
+total       166664                    
 ```
 From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
 We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
@@ -55,7 +55,7 @@ This looks fairly innocent, but it turns out that it is very inefficient - both 
 +     x[1, 1] <- 0
 + })
 > print(p, expr = FALSE)
-Memory allocations (>= 1000 bytes):
+Memory allocations (>= 2000 bytes):
        what  bytes      calls
 1     alloc  40040   matrix()
 2     alloc  80040 <internal>
@@ -70,7 +70,7 @@ To avoid this, we make sure to create a numeric matrix upfront as:
 +     x[1, 1] <- 0
 + })
 > print(p, expr = FALSE)
-Memory allocations (>= 1000 bytes):
+Memory allocations (>= 2000 bytes):
        what bytes    calls
 1     alloc 80040 matrix()
 total       80040         
@@ -89,8 +89,8 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 > stats
 Unit: milliseconds
  expr   min    lq  mean median    uq  max neval cld
-  bad 0.015 0.016 0.040  0.019 0.051 0.86   100   a
- good 0.010 0.011 0.026  0.012 0.035 0.56   100   a
+  bad 0.015 0.016 0.041  0.021 0.050 0.94   100   a
+ good 0.010 0.011 0.029  0.012 0.033 0.80   100   a
 ```
 The ineffcient approach is 1.5-2 times slower than the efficient one.
 
