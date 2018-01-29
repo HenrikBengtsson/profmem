@@ -20,13 +20,13 @@ Rprofmem memory profiling of:
     Y <- matrix(rnorm(n = 10000), nrow = 100)
 }
 Memory allocations (>= 1000 bytes):
-Number of 'new page' entries not displayed: 6
+Number of 'new page' entries not displayed: 10
        what  bytes               calls
-4     alloc   4040           integer()
-6     alloc  80040 matrix() -> rnorm()
-7     alloc   2544 matrix() -> rnorm()
-8     alloc  80040            matrix()
-9     alloc   1064          <internal>
+7     alloc   4040           integer()
+9     alloc  80040 matrix() -> rnorm()
+10    alloc   2544 matrix() -> rnorm()
+11    alloc  80040            matrix()
+13    alloc   1064          <internal>
 total       167728                    
 ```
 From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
@@ -89,8 +89,8 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 > stats
 Unit: milliseconds
  expr   min    lq  mean median    uq  max neval cld
-  bad 0.015 0.016 0.038  0.016 0.051 0.83   100   a
- good 0.010 0.011 0.027  0.011 0.034 0.58   100   a
+  bad 0.015 0.016 0.040  0.019 0.051 0.86   100   a
+ good 0.010 0.011 0.026  0.012 0.035 0.56   100   a
 ```
 The ineffcient approach is 1.5-2 times slower than the efficient one.
 

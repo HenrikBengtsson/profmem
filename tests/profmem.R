@@ -1,10 +1,20 @@
 library("profmem")
 
+status <- profmem_status()
+message("status: ", status)
+
+depth <- profmem_depth()
+message("depth: ", depth)
+
 if (capabilities("profmem")) {
 
   p <- profmem({
     x <- raw(1000)
     A <- matrix(rnorm(100), ncol=10)
+    status_2 <- profmem_status()
+    depth_2 <- profmem_depth()
+    message("depth_2: ", depth_2)
+    stopifnot(depth2 == depth_+ 1)
   })
   print(p)
 
