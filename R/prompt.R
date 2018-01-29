@@ -1,3 +1,11 @@
+#' Produce a prompt-compatible string with profmem information
+#'
+#' @param what Action to take.
+#'
+#' @param threshold The profmem threshold to be used.
+#'
+#' @export
+#' @keywords internal
 profmem_prompt <- local({
   .last_profmem <- NULL
   
