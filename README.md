@@ -20,18 +20,18 @@ Rprofmem memory profiling of:
     Y <- matrix(rnorm(n = 10000), nrow = 100)
 }
 Memory allocations (>= 1000 bytes):
-Number of NA entries not displayed: 6
-       bytes               calls
-4       4040           integer()
-6      80040 matrix() -> rnorm()
-7       2544 matrix() -> rnorm()
-8      80040            matrix()
-10      1064          <internal>
-total 167728                    
+Number of 'new page' entries not displayed: 6
+       what  bytes               calls
+4     alloc   4040           integer()
+6     alloc  80040 matrix() -> rnorm()
+7     alloc   2544 matrix() -> rnorm()
+8     alloc  80040            matrix()
+9     alloc   1064          <internal>
+total       167728                    
 ```
 From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
 We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
-Finally, the last entry reflects the memory allocation of 80040 bytes done by `matrix()` itself.
+Finally, the following entry reflects the memory allocation of 80040 bytes done by `matrix()` itself.
 
 
 ## An example where memory profiling can make a difference
@@ -56,10 +56,10 @@ This looks fairly innocent, but it turns out that it is very inefficient - both 
 + })
 > print(p, expr = FALSE)
 Memory allocations (>= 1000 bytes):
-       bytes      calls
-1      40040   matrix()
-2      80040 <internal>
-total 120080           
+       what  bytes      calls
+1     alloc  40040   matrix()
+2     alloc  80040 <internal>
+total       120080           
 ```
 The first entry is for the logical matrix with 10,000 elements (= 4 \* 10,000 bytes + small header) that we allocate.  The second entry reveals the coercion of this matrix to a numeric matrix (= 8 \* 10,000 elements + small header).
 
@@ -71,9 +71,9 @@ To avoid this, we make sure to create a numeric matrix upfront as:
 + })
 > print(p, expr = FALSE)
 Memory allocations (>= 1000 bytes):
-      bytes    calls
-1     80040 matrix()
-total 80040         
+       what bytes    calls
+1     alloc 80040 matrix()
+total       80040         
 ```
 
 Using the [microbenchmark] package, we can also quantify the extra overhead in processing time that is introduced due to the logical-to-numeric coercion;
@@ -89,8 +89,8 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 > stats
 Unit: milliseconds
  expr   min    lq  mean median    uq  max neval cld
-  bad 0.015 0.016 0.038  0.016 0.050 0.84   100   a
- good 0.010 0.011 0.026  0.011 0.034 0.54   100   a
+  bad 0.015 0.016 0.038  0.016 0.051 0.83   100   a
+ good 0.010 0.011 0.027  0.011 0.034 0.58   100   a
 ```
 The ineffcient approach is 1.5-2 times slower than the efficient one.
 
