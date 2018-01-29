@@ -12,18 +12,40 @@ profmem_stack <- local({
   empty <- structure(empty, class = c("Rprofmem", "data.frame"), threshold = 0L)
   
   stack <- list()
+  suspended <- FALSE
   
-  function(action = c("depth", "threshold", "push", "pop", "append"),
+  function(action = c("status", "depth", "threshold", "push", "pop", "append", "suspend", "resume"),
            data = empty, threshold = 0L) {
     action <- match.arg(action)
-    if (action == "depth") return(length(stack))
 
-    if (action == "threshold") {
+    ## Status queries
+    if (action == "status") {
+      if (length(stack) == 0) return("inactive")
+      if (suspended) return("suspended")
+      return("active")
+    } else if (action == "depth") {
+      return(length(stack))
+    } else if (action == "threshold") {
       if (length(stack) == 0) return(NA_integer_)
       threshold <- attr(stack[[1]], "threshold")
       return(threshold)
     }
     
+    ## State changing
+    if (action == "suspend") {
+      suspended <<- TRUE
+      ## WORKAROUND: If not, above won't happen /2018-01-29
+      dummy <- suspended
+      return(invisible(suspended))
+    } else if (action == "resume") {
+      suspended <<- FALSE
+      ## WORKAROUND: If not, above won't happen /2018-01-29
+      dummy <- suspended
+      return(invisible(suspended))
+    }
+
+    
+    ## Stack changing
     if (action == "push") {
       stopifnot(inherits(data, "Rprofmem"),
                 length(threshold) == 1, is.finite(threshold),
@@ -32,9 +54,7 @@ profmem_stack <- local({
       stack <<- c(stack, list(data))
 #      message("PUSH: stack depth: ", length(stack))
       return(length(stack))
-    }
-    
-    if (action == "pop") {
+    } else if (action == "pop") {
       depth <- length(stack)
       if (depth == 0) stop("Cannot 'pop' - profmem stack is empty")
       value <- stack[[depth]]
@@ -47,9 +67,7 @@ profmem_stack <- local({
       }
 #      message("POP: stack depth: ", length(stack))
       return(value)
-    }
-
-    if (action == "append") {
+    } else if (action == "append") {
       depth <- length(stack)
       if (depth == 0) stop("Cannot 'append' - profmem stack is empty")
       stopifnot(inherits(data, "Rprofmem"),
@@ -64,6 +82,23 @@ profmem_stack <- local({
     }
   }
 })
+
+
+#' @return `profmem_status()` returns `"inactive"`, `"active"`, or `"suspended"`.
+#'
+#' @rdname profmem
+#' @export
+profmem_status <- function() {
+  profmem_stack("status")
+}
+
+#' @return `promem_depth()` returns a non-negative integer.
+#'
+#' @rdname profmem
+#' @export
+profmem_depth <- function() {
+  profmem_stack("depth")
+}
 
 
 #' Memory profiling R
@@ -213,6 +248,8 @@ profmem_suspend <- function() {
   ## Works regardless of active Rprofmem exists or not
   Rprofmem("")
 
+  profmem_stack("suspend")
+  
   ## Nothing more to do?
   if (profmem_stack("depth") == 0) return()
   
@@ -233,6 +270,7 @@ profmem_resume <- function() {
   threshold <- profmem_stack("threshold")
   pathname <- profmem_pathname()
   Rprofmem(filename = pathname, threshold = threshold)
+  profmem_stack("resume")
   invisible()
 }
 

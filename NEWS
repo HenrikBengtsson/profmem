@@ -1,7 +1,7 @@
 Package: profmem
 ================
 
-Version: 0.4.0-9000 [2018-01-28]
+Version: 0.4.0-9000 [2018-01-29]
 
 SIGNIFICANT CHANGES:
 
@@ -16,6 +16,11 @@ NEW FEATURES:
 
  o Added profmem_suspend() and profmem_resume() for suspending and resuming
    an active profmem session.
+
+ o Added profmem_status() for checking whether profmem is inactive, active, or
+   suspended.
+   
+ o Added profmem_depth() to get the current depth of nested profmem sessions. 
 
  o print() for Rprofmem now reports on the threshold used, if known.
 
