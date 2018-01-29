@@ -28,9 +28,6 @@ NEW FEATURES:
    controlling whether the profiled R expression and 'new page' entries should
    be displayed or not.
 
- o Added profmem_prompt() for producing a prompt-compatible string that
-   contains information on the memory profile since the last prompt.
-
 DOCUMENTATION:
 
  o VIGNETTE: Updated the example in Section 'An example where memory profiling
