@@ -7,6 +7,7 @@
 #' @export
 #' @keywords internal
 profmem_prompt <- local({
+  .suspended <- FALSE
   .depth <- NULL
   .last_profmem <- NULL
 
@@ -18,6 +19,7 @@ profmem_prompt <- local({
   function(what = c("update", "suspend", "resume", "prompt", "begin", "end"), threshold = 10 * 1024) {
     what <- match.arg(what)
 
+    ## Produce prompt string
     if (what == "prompt") {
       if (is.null(.last_profmem)) return("")
 
@@ -48,7 +50,16 @@ profmem_prompt <- local({
       return(prompt)
     }
 
-    if (what == "end") {
+    
+    ## Begin and end profiling by the prompt
+    if (what == "begin") {
+      if (!.suspended && is.null(.depth)) {
+        tryCatch({
+          profmem_begin(threshold = threshold)
+          .depth <<- profmem_depth()
+        }, error = function(ex) NULL)
+      }
+    } else if (what == "end") {
       if (!is.null(.depth) && .depth == profmem_depth()) {
         .last_profmem <<- tryCatch({
           p <- profmem_end()
@@ -56,13 +67,18 @@ profmem_prompt <- local({
           p
         }, error = function(ex) NULL)
       }
-    } else if (what == "begin") {
-      if (is.null(.depth)) {
-        tryCatch({
-          profmem_begin(threshold = threshold)
-          .depth <<- profmem_depth()
-        }, error = function(ex) NULL)
-      }
     }
+
+
+    ## Tweak how profiling is done by the prompt
+    if (what == "suspend") {
+      .suspended <<- TRUE
+      force(t <- .suspended)
+    } else if (what == "suspend") {
+      .suspended <<- FALSE
+      force(t <- .suspended)
+    } else if (what == "update") {
+    }
+    
   }
 })
