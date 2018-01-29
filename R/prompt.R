@@ -21,7 +21,7 @@ profmem_prompt <- local({
     if (what == "prompt") {
       if (is.null(.last_profmem)) return("")
 
-      depth <- profmem_stack("depth")
+      depth <- profmem_depth()
       if (!is.null(.depth) && .depth != depth) {
         return("waiting for active profmem to close")
       }
@@ -49,7 +49,7 @@ profmem_prompt <- local({
     }
 
     if (what == "end") {
-      if (!is.null(.depth) && .depth == profmem_stack("depth")) {
+      if (!is.null(.depth) && .depth == profmem_depth()) {
         .last_profmem <<- tryCatch({
           p <- profmem_end()
           .depth <<- NULL
@@ -60,7 +60,7 @@ profmem_prompt <- local({
       if (is.null(.depth)) {
         tryCatch({
           profmem_begin(threshold = threshold)
-          .depth <<- profmem_stack("depth")
+          .depth <<- profmem_depth()
         }, error = function(ex) NULL)
       }
     }
