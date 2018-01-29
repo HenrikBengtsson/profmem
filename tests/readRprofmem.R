@@ -38,6 +38,8 @@ stopifnot(nrow(p) >= length(fixed))
 
 message(" - empty file")
 
+options(profmem.debug = TRUE)
+
 empty <- tempfile()
 writeLines(character(0L), con = empty)
 
@@ -55,6 +57,8 @@ stopifnot(nrow(p) == 0L)
 
 p <- readRprofmem(empty, as = "profmem")
 stopifnot(nrow(p) == 0L)
+
+options(profmem.debug = FALSE)
 
 
 if (capabilities("profmem")) {

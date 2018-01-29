@@ -19,9 +19,9 @@ NEW FEATURES:
 
  o print() for Rprofmem now reports on the threshold used, if known.
 
- o print() for Rprofmem gained arguments 'expr = TRUE' and 'na.rm = TRUE',
-   controlling whether the profiled R expression and NA entries should be
-   displayed or not.
+ o print() for Rprofmem gained arguments 'expr = TRUE' and 'newpage = FALSE',
+   controlling whether the profiled R expression and 'new page' entries should
+   be displayed or not.
 
  o nrow() on an Rprofmem object now gives the number of allocations.
 

@@ -8,7 +8,7 @@ profmem_pathname <- local({
 })
 
 profmem_stack <- local({
-  empty <- data.frame(bytes = NULL, trace = NULL, stringsAsFactors = FALSE)
+  empty <- data.frame(what = NULL, bytes = NULL, trace = NULL, stringsAsFactors = FALSE)
   empty <- structure(empty, class = c("Rprofmem", "data.frame"), threshold = 0L)
   
   stack <- list()

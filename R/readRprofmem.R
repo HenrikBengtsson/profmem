@@ -52,11 +52,18 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "profmem", "fixed", "raw")
     bfr <- grep("^#", bfr, value = TRUE, invert = TRUE)
   }
 
+  if (getOption("profmem.debug", FALSE)) print(bfr)
+  
   ## Parse Rprofmem results
   pattern <- "^([0-9]+|new page)[ ]?:(.*)"
   res <- lapply(bfr, FUN=function(x) {
     bytes <- gsub(pattern, "\\1", x)
-    bytes[bytes == "new page"] <- ""  # Will become NA below w/out warning
+    what <- rep("alloc", times = length(x))
+    idxs <- which(bytes == "new page")
+    if (length(idxs) > 0) {
+      what[idxs] <- "new page"
+      bytes[idxs] <- ""  # Will become NA below w/out warning
+    }
     bytes <- as.numeric(bytes)
 
     trace <- gsub(pattern, "\\2", x)
@@ -66,24 +73,26 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "profmem", "fixed", "raw")
     trace <- eval(parse(text=trace))
     trace <- trace[seq_len(max(0L, length(trace)-drop))]
 
-    list(bytes=bytes, trace=trace)
+    list(what = what, bytes = bytes, trace = trace)
   })
 
   if (length(res) == 0) {
+    what <- character(0L)
     bytes <- integer(0L)
     traces <- list()
   } else {
+    what <- unlist(lapply(res, FUN=function(x) x$what), use.names=FALSE)
     bytes <- unlist(lapply(res, FUN=function(x) x$bytes), use.names=FALSE)
     traces <- lapply(res, FUN=function(x) x$trace)
   }
-  res <- data.frame(bytes=bytes, stringsAsFactors=FALSE)
+  res <- data.frame(what = what, bytes = bytes, stringsAsFactors = FALSE)
   res$trace <- traces
   bfr <- bytes <- traces <- NULL
   
   class(res) <- c("Rprofmem", class(res))
 
   ## Sanity check
-  stopifnot(c("bytes", "trace") %in% names(res))
+  stopifnot(c("what", "bytes", "trace") %in% names(res))
   
   res
 } ## readRprofmem()
