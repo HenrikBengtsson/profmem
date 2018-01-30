@@ -29,12 +29,6 @@ print(p)
 str(p)
 stopifnot(nrow(p) == length(fixed))
 
-p <- readRprofmem(broken, as = "profmem")
-cat("readRprofmem(broken, as = 'profmem'):\n")
-print(p)
-str(p)
-stopifnot(nrow(p) >= length(fixed))
-
 
 message(" - empty file")
 
@@ -53,9 +47,6 @@ fixed <- readRprofmem(empty, as = "fixed")
 stopifnot(is.character(raw), length(raw) == 0)
 
 p <- readRprofmem(empty, as = "Rprofmem")
-stopifnot(nrow(p) == 0L)
-
-p <- readRprofmem(empty, as = "profmem")
 stopifnot(nrow(p) == 0L)
 
 options(profmem.debug = FALSE)
@@ -88,12 +79,6 @@ if (capabilities("profmem")) {
 
   p <- readRprofmem(live, as = "Rprofmem")
   cat("readRprofmem(live, as = 'Rprofmem'):\n")
-  print(p)
-  str(p)
-  stopifnot(nrow(p) == length(fixed))
-
-  p <- readRprofmem(live, as = "profmem")
-  cat("readRprofmem(live, as = 'profmem'):\n")
   print(p)
   str(p)
   stopifnot(nrow(p) == length(fixed))

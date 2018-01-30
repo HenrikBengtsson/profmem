@@ -12,8 +12,6 @@
 #' added to lines with empty stack calls (see Ref. 1).
 #' If `"Rprofmem"`, the collected Rprofmem data is fully
 #' parsed into bytes and call stack information.
-#' If `"profmem"`, then also \pkg{profmem}-specific entries injected into
-#' the Rprofmem log file by \pkg{profmem} are also parsed.
 #' 
 #' @param drop Number of levels to drop from the top of the call stack.
 #' 
@@ -26,7 +24,7 @@
 #'
 #' @export
 #' @importFrom utils file_test
-readRprofmem <- function(pathname, as = c("Rprofmem", "profmem", "fixed", "raw"), drop = 0L, ...) {
+readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...) {
   stopifnot(file_test("-f", pathname))
   as <- match.arg(as)
   drop <- as.integer(drop)
@@ -46,11 +44,6 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "profmem", "fixed", "raw")
   }
 
   if (as == "fixed") return(bfr)
-
-  ## Drop comments
-  if (as == "profmem") {
-    bfr <- grep("^#", bfr, value = TRUE, invert = TRUE)
-  }
 
   if (getOption("profmem.debug", FALSE)) print(bfr)
   

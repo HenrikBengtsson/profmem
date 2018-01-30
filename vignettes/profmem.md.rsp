@@ -16,9 +16,9 @@
 library("R.utils")
 
 oopts <- options(
-  "withCapture/newline"=FALSE,
-  mc.cores=2L,
-  digits=2L
+  "withCapture/newline" = FALSE,
+  mc.cores = 2L,
+  digits = 2L
 )
 set.seed(0xBEEF) ## Just to minimize diff when rebuilt
 
@@ -29,7 +29,7 @@ options(profmem.threshold = 1000)
 ## Initiate the random number generator, because otherwise it will
 ## be done and captured during the first profiling below.  It is not
 ## fully clear to me what the R internals behind this is.  For instance,
-## it is not enough to call `sample.int(n=1)`.  But calling rnorm(n=1)
+## it is not enough to call `sample.int(n = 1)`.  But calling rnorm(n = 1)
 ## seems to avoid the problem.
 rnorm(n=1)
 %>
@@ -52,7 +52,7 @@ options(profmem.threshold = 2000)
 
 p <- profmem({
   x <- integer(1000)
-  Y <- matrix(rnorm(n=10000), nrow=100)
+  Y <- matrix(rnorm(n = 10000), nrow = 100)
 })
 p
 })%>
@@ -74,8 +74,8 @@ Assume we want to set a 100-by-100 matrix with missing values except for element
 ```r
 <%=withCapture({
 x <- matrix(nrow = 100, ncol = 100)
-x[1,1] <- 0
-x[1:3,1:3]
+x[1, 1] <- 0
+x[1:3, 1:3]
 })%>
 ```
 This looks fairly innocent, but it turns out that it is very inefficient - both when it comes to memory and speed.  The reason is that the default value used by `matrix()` is `NA`, which is of type _logical_.  This means that initially `x` is a _logical_ matrix not a _numeric_ matrix.  When we the assign the (1,1) element the value `0`, which is a _numeric_, the matrix first has to be coerced to _numeric_ internally and then the zero is assigned.  Profiling the memory will reveal this;
@@ -87,7 +87,7 @@ This looks fairly innocent, but it turns out that it is very inefficient - both 
 <%=withCapture({
 p <- profmem({
   x <- matrix(nrow = 100, ncol = 100)
-  x[1,1] <- 0
+  x[1, 1] <- 0
 })
 print(p, expr = FALSE)
 })%>
@@ -99,7 +99,7 @@ To avoid this, we make sure to create a numeric matrix upfront as:
 <%=withCapture({
 p <- profmem({
   x <- matrix(NA_real_, nrow = 100, ncol = 100)
-  x[1,1] <- 0
+  x[1, 1] <- 0
 })
 print(p, expr = FALSE)
 })%>
@@ -112,11 +112,11 @@ library("microbenchmark")
 stats <- microbenchmark(
   bad   = {
     x <- matrix(nrow = 100, ncol = 100)
-    x[1,1] <- 0
+    x[1, 1] <- 0
   },
   good  = {
     x <- matrix(NA_real_, nrow = 100, ncol = 100)
-    x[1,1] <- 0
+    x[1, 1] <- 0
   },
   times = 100,
   unit = "ms"

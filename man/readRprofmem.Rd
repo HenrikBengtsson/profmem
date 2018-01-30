@@ -4,8 +4,7 @@
 \alias{readRprofmem}
 \title{Read an Rprofmem log file}
 \usage{
-readRprofmem(pathname, as = c("Rprofmem", "profmem", "fixed", "raw"),
-  drop = 0L, ...)
+readRprofmem(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...)
 }
 \arguments{
 \item{pathname}{The Rprofmem log file to be read.}
@@ -16,9 +15,7 @@ If \code{"raw"}, the line content of the file is returned as is
 If \code{"fixed"}, as \code{"raw"} but with missing newlines
 added to lines with empty stack calls (see Ref. 1).
 If \code{"Rprofmem"}, the collected Rprofmem data is fully
-parsed into bytes and call stack information.
-If \code{"profmem"}, then also \pkg{profmem}-specific entries injected into
-the Rprofmem log file by \pkg{profmem} are also parsed.}
+parsed into bytes and call stack information.}
 
 \item{drop}{Number of levels to drop from the top of the call stack.}
 

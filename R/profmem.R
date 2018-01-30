@@ -156,7 +156,7 @@ profmem_suspend <- function() {
   ## Import current log
   drop <- length(sys.calls()) + 4L
   pathname <- profmem_pathname()
-  data <- readRprofmem(pathname, drop = drop, as = "profmem")
+  data <- readRprofmem(pathname, drop = drop)
   attr(data, "threshold") <- profmem_stack("threshold")
   profmem_stack("append", data)
 
