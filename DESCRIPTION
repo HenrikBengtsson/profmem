@@ -1,5 +1,5 @@
 Package: profmem
-Version: 0.5.0
+Version: 0.5.0-9000
 Title: Simple Memory Profiling for R
 Imports:
     utils
