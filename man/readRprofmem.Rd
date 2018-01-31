@@ -13,7 +13,7 @@ readRprofmem(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...)
 If \code{"raw"}, the line content of the file is returned as is
 (as a character vector).
 If \code{"fixed"}, as \code{"raw"} but with missing newlines
-added to lines with empty stack calls (see [1]).
+added to lines with empty stack calls (see Ref. 1).
 If \code{"Rprofmem"}, the collected Rprofmem data is fully
 parsed into bytes and call stack information.}
 
@@ -26,9 +26,8 @@ An \code{Rprofmem} data.frame (or a character vector)
 }
 \description{
 Reads and parses an Rprofmem log file that was created by
-\code{\link[utils]{Rprofmem}()}.
+\code{\link[utils:Rprofmem]{utils::Rprofmem()}}.
 }
 \references{
-[1] \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
+Ref. 1: \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
 }
-

@@ -1,6 +1,6 @@
 #' Total number of bytes allocated
 #'
-#' @param x An \code{Rprofmem} object.
+#' @param x An `Rprofmem` object.
 #' @param ... Not used.
 #'
 #' @return A non-negative numeric.
@@ -16,14 +16,51 @@ total.Rprofmem <- function(x, ...) {
 }
 
 #' @export
+c.Rprofmem <- function(...) {
+  args <- list(...)
+  
+  what <- NULL
+  bytes <- NULL
+  trace <- NULL
+  threshold <- NULL
+  
+  for (arg in args) {
+    stopifnot(inherits(arg, "Rprofmem"))
+    what <- c(what, arg$what)
+    bytes <- c(bytes, arg$bytes)
+    trace <- c(trace, arg$trace)
+    threshold <- c(threshold, attr(arg, "threshold"))
+  }
+  threshold <- max(threshold)
+  stopifnot(length(threshold) == 1, is.finite(threshold),
+            is.integer(threshold), threshold >= 0L)
+  
+  res <- data.frame(what = what, bytes = bytes, stringsAsFactors = FALSE)
+  res$trace <- trace
+  if (threshold > 0L) {
+    keep <- is.na(bytes) | (bytes >= threshold)
+    stopifnot(all(is.finite(keep)))
+    res <- res[keep, ]
+  }
+  attr(res, "threshold") <- threshold
+  class(res) <- c("Rprofmem", class(res))
+  ## Sanity check
+  stopifnot(c("what", "bytes", "trace") %in% names(res))
+  
+  res
+}
+
+#' @export
 subset.Rprofmem <- function(x, ...) {
   res <- NextMethod("subset")
   attr(res, "expression") <- attr(x, "expression")
+  attr(res, "threshold") <- attr(x, "threshold")
   res
 }
 
 #' @export
 as.data.frame.Rprofmem <- function(x, ...) {
+  what <- x$what
   bytes <- x$bytes
   traces <- unlist(lapply(x$trace, FUN=function(x) {
     trace <- rev(x)
@@ -32,7 +69,8 @@ as.data.frame.Rprofmem <- function(x, ...) {
     paste(trace, collapse=" -> ")
   }))
   
-  res <- data.frame(bytes=bytes, calls=traces, stringsAsFactors=FALSE)
+  res <- data.frame(what = what, bytes = bytes, calls = traces,
+                    stringsAsFactors = FALSE)
 
   ## Preserve row names
   rownames(res) <- rownames(x)
@@ -42,12 +80,31 @@ as.data.frame.Rprofmem <- function(x, ...) {
 
 
 #' @export
-print.Rprofmem <- function(x, ...) {
-  cat("Rprofmem memory profiling of:\n")
-  print(attr(x, "expression"))
+print.Rprofmem <- function(x, expr = TRUE, newpage = FALSE, ...) {
+  if (expr && "expression" %in% names(attributes(x))) {
+    cat("Rprofmem memory profiling of:\n")
+    print(attr(x, "expression"))
+    cat("\n")
+  }
 
-  cat("\nMemory allocations:\n")
-  data <- as.data.frame(x)
+  threshold <- attr(x, "threshold")
+  if (is.null(threshold) || threshold == 0L) {
+    cat("Memory allocations:\n")
+  } else {
+    cat(sprintf("Memory allocations (>= %g bytes):\n", threshold))
+  }
+
+  data <- as.data.frame(x, ...)
+  
+  if (!newpage) {
+    drop <- which(x$what == "new page")
+    if (length(drop) > 0) {
+      cat(sprintf("Number of 'new page' entries not displayed: %d\n",
+                  length(drop)))
+      data <- data[-drop, ]
+    }
+  }
+  
   n <- nrow(data)
   total <- sum(data$bytes, na.rm=TRUE)
 
@@ -60,8 +117,10 @@ print.Rprofmem <- function(x, ...) {
   ## Report empty call stack as "internal"
   data$calls[!nzchar(data$calls)] <- "<internal>"
 
-  data <- rbind(data, list(bytes=total, calls=""))
+  data <- rbind(data, list(what = "", bytes = total, calls = ""))
   rownames(data)[n+1] <- "total"
 
   print(data, ...)
+  
+  invisible(x)
 } ## print()

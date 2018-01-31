@@ -9,6 +9,7 @@ For example,
 
 ```r
 > library("profmem")
+> options(profmem.threshold = 2000)
 > p <- profmem({
 +     x <- integer(1000)
 +     Y <- matrix(rnorm(n = 10000), nrow = 100)
@@ -19,98 +20,82 @@ Rprofmem memory profiling of:
     x <- integer(1000)
     Y <- matrix(rnorm(n = 10000), nrow = 100)
 }
-Memory allocations:
-       bytes               calls
-1       4040           integer()
-2      80040 matrix() -> rnorm()
-3       2544 matrix() -> rnorm()
-4      80040            matrix()
-total 166664                    
+Memory allocations (>= 2000 bytes):
+Number of 'new page' entries not displayed: 9
+       what  bytes               calls
+7     alloc   4040           integer()
+9     alloc  80040 matrix() -> rnorm()
+10    alloc   2544 matrix() -> rnorm()
+11    alloc  80040            matrix()
+total       166664                    
 ```
 From this, we find that 4040 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
 We also see that `rnorm()`, which is called via `matrix()`, allocates 80040 + 2544 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
-Finally, the last entry reflects the memory allocation of 80040 bytes done by `matrix()` itself.
+Finally, the following entry reflects the memory allocation of 80040 bytes done by `matrix()` itself.
 
 
 ## An example where memory profiling can make a difference
 
-Assume we have an integer vector
+Assume we want to set a 100-by-100 matrix with missing values except for element (1,1) that we assign to be zero.  This can be done as:
 ```r
-> x <- sample(1:10000, size = 10000)
-> str(x)
- int [1:10000] 7148 9595 741 1573 4829 4405 1459 17 2857 9193 ...
+> x <- matrix(nrow = 100, ncol = 100)
+> x[1, 1] <- 0
+> x[1:3, 1:3]
+     [,1] [,2] [,3]
+[1,]    0   NA   NA
+[2,]   NA   NA   NA
+[3,]   NA   NA   NA
 ```
-and we would like to identify all elements less than 5000.  Then we can use
-```r
-> small <- (x < 5000)
-> str(small)
- logi [1:10000] FALSE FALSE TRUE TRUE TRUE TRUE ...
-```
-This looks fairly innocent, but it turns out that it is unnecessarily inefficient - both when it comes to memory and speed.  The reason is that `5000` is of data type double whereas `x` is of type integer;
-```r
-> typeof(x)
-[1] "integer"
-> typeof(5000)
-[1] "double"
-```
-Because of this difference in types, R chooses to first coerce `x` into a double vector before comparing with another double (here `5000`).  Having to coerce to another data type consumes extra memory, which we can see if we profile the memory:
+This looks fairly innocent, but it turns out that it is very inefficient - both when it comes to memory and speed.  The reason is that the default value used by `matrix()` is `NA`, which is of type _logical_.  This means that initially `x` is a _logical_ matrix not a _numeric_ matrix.  When we the assign the (1,1) element the value `0`, which is a _numeric_, the matrix first has to be coerced to _numeric_ internally and then the zero is assigned.  Profiling the memory will reveal this;
+
+
 ```r
 > p <- profmem({
-+     small <- (x < 5000)
++     x <- matrix(nrow = 100, ncol = 100)
++     x[1, 1] <- 0
 + })
-> p
-Rprofmem memory profiling of:
-{
-    small <- (x < 5000)
-}
-Memory allocations:
-       bytes      calls
-1      80040 <internal>
-2      40040 <internal>
-total 120080           
+> print(p, expr = FALSE)
+Memory allocations (>= 2000 bytes):
+       what  bytes      calls
+1     alloc  40040   matrix()
+2     alloc  80040 <internal>
+total       120080           
 ```
-But before anything else, the sizes of `x` and `small` are:
-```r
-> object.size(x)
-40040 bytes
-> object.size(small)
-40040 bytes
-```
-which is because `x` is of type integer (4 bytes per element) and `small` is of type logical (also 4 bytes per element).
+The first entry is for the logical matrix with 10,000 elements (= 4 \* 10,000 bytes + small header) that we allocate.  The second entry reveals the coercion of this matrix to a numeric matrix (= 8 \* 10,000 elements + small header).
 
-Now, due the coercion of `x` to double, an internal double vector of the same length as `x` is temporarily created (and populated with values from `x`).  This is what is reported in the first row of `p`.  Since each double value occupies 8 bytes of memory, the size of this internal object is 80040 bytes.
-At this point, R is ready to compare the internal double vector against the double value `5000`.  The result of this comparison will be stored in a logical vector of length 10000.  This is what is reported in the second row of `p`.  This logical vector is assigned to variable `small` at the end.
-
-We can avoid the coercion to double if we compare `x` to an integer value (`5000L`) instead of a double value (`5000`), which is also confirmed if we profile memory allocations;
+To avoid this, we make sure to create a numeric matrix upfront as:
 ```r
-> p2 <- profmem({
-+     small <- (x < 5000L)
+> p <- profmem({
++     x <- matrix(NA_real_, nrow = 100, ncol = 100)
++     x[1, 1] <- 0
 + })
-> p2
-Rprofmem memory profiling of:
-{
-    small <- (x < 5000L)
-}
-Memory allocations:
-      bytes      calls
-1     40040 <internal>
-total 40040           
+> print(p, expr = FALSE)
+Memory allocations (>= 2000 bytes):
+       what bytes    calls
+1     alloc 80040 matrix()
+total       80040         
 ```
-In this case, all that is allocated is the memory for holding the logical result that is later assigned to `small`.
 
-Using the [microbenchmark] package, we can also quantify the extra overhead in processing time that is introduced due to the coercion of `x` to double;
+Using the [microbenchmark] package, we can also quantify the extra overhead in processing time that is introduced due to the logical-to-numeric coercion;
 ```r
 > library("microbenchmark")
-> stats <- microbenchmark(double = (x < 5000), integer = (x < 
-+     5000), times = 100, unit = "ms")
+> stats <- microbenchmark(bad = {
++     x <- matrix(nrow = 100, ncol = 100)
++     x[1, 1] <- 0
++ }, good = {
++     x <- matrix(NA_real_, nrow = 100, ncol = 100)
++     x[1, 1] <- 0
++ }, times = 100, unit = "ms")
 > stats
 Unit: milliseconds
-    expr   min    lq  mean median    uq   max neval
-  double 0.035 0.036 0.049  0.037 0.064 0.076   100
- integer 0.017 0.017 0.030  0.017 0.027 0.859   100
+ expr   min    lq  mean median    uq  max neval cld
+  bad 0.015 0.016 0.041  0.021 0.050 0.94   100   a
+ good 0.010 0.011 0.029  0.012 0.033 0.80   100   a
 ```
-Comparing integer vector `x` to an integer is in this case approximately twice as fast as comparing to a double.  This is also true for vectors with many more elements than 10000.
+The ineffcient approach is 1.5-2 times slower than the efficient one.
 
+
+The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.
 
 The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.
 
@@ -136,10 +121,10 @@ profmem
 ```
 The overhead of running an R installation with memory profiling enabled compared to one without is neglectable / non-measurable.
 
-Volunteers of the R Project provide pre-built binaries of the R software available via CRAN at https://cran.r-project.org/.  Among these, [it has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R binaries for Windows, the ones from the Ubuntu Linux distribution, and the nightly builds for macOS by the AT&T Research Lab have all been built with memory profiling enabled.  It is possible that it is also enabled by default for the other Linux distributions as well as the other macOS binaries, but this has to be confirmed.
+Volunteers of the R Project provide and distribute pre-built binaries of the R software for all the major operating system via [CRAN].  [It has been confirmed](https://github.com/HenrikBengtsson/profmem/issues/2) that the R binaries for Windows, macOS (both by CRAN and by the AT&T Research Lab), and for Linux (\*) all have been built with memory profiling enabled.  (\*) For Linux, this has been confirmed for the Debian/Ubuntu distribution but yet not for the other Linux distributions.
 
 
-To enable memory profiling, which is _only_ needed if `capabilities("profmem")` returns `FALSE`, R needs to be _configured_ and _built_ from source using:
+In all other cases, to enable memory profiling, which is _only_ needed if `capabilities("profmem")` returns `FALSE`, R needs to be _configured_ and _built from source_ using:
 ```sh
 $ ./configure --enable-memory-profiling
 $ make
@@ -148,30 +133,38 @@ For more information, please see the 'R Installation and Administration' documen
 
 
 
+[CRAN]: https://cran.r-project.org/
 [profmem]: https://cran.r-project.org/package=profmem
 [microbenchmark]: https://cran.r-project.org/package=microbenchmark
 
 
 ## Installation
-R package profmem is available on [CRAN](http://cran.r-project.org/package=profmem) and can be installed in R as:
+R package profmem is available on [CRAN](https://cran.r-project.org/package=profmem) and can be installed in R as:
 ```r
 install.packages('profmem')
 ```
 
 ### Pre-release version
 
-To install the pre-release version that is available in branch `develop`, use:
+To install the pre-release version that is available in Git branch `develop` on GitHub, use:
 ```r
-source('http://callr.org/install#HenrikBengtsson/profmem@develop')
+remotes::install_github('HenrikBengtsson/profmem@develop')
 ```
 This will install the package from source.  
 
 
 
+## Contributions
+
+This Git repository uses the [Git Flow](http://nvie.com/posts/a-successful-git-branching-model/) branching model (the [`git flow`](https://github.com/petervanderdoes/gitflow-avh) extension is useful for this).  The [`develop`](https://github.com/HenrikBengtsson/profmem/tree/develop) branch contains the latest contributions and other code that will appear in the next release, and the [`master`](https://github.com/HenrikBengtsson/profmem) branch contains the code of the latest release, which is exactly what is currently on [CRAN](https://cran.r-project.org/package=profmem).
+
+Contributing to this package is easy.  Just send a [pull request](https://help.github.com/articles/using-pull-requests/).  When you send your PR, make sure `develop` is the destination branch on the [profmem repository](https://github.com/HenrikBengtsson/profmem).  Your PR should pass `R CMD check --as-cran`, which will also be checked by <a href="https://travis-ci.org/HenrikBengtsson/profmem">Travis CI</a> and <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem">AppVeyor CI</a> when the PR is submitted.
+
+
 ## Software status
 
-| Resource:     | CRAN        | Travis CI      | Appveyor         |
-| ------------- | ------------------- | -------------- | ---------------- |
-| _Platforms:_  | _Multiple_          | _Linux & OS X_ | _Windows_        |
-| R CMD check   | <a href="http://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>  | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
-| Test coverage |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>    |                  |
+| Resource:     | CRAN        | Travis CI       | Appveyor         |
+| ------------- | ------------------- | --------------- | ---------------- |
+| _Platforms:_  | _Multiple_          | _Linux & macOS_ | _Windows_        |
+| R CMD check   | <a href="https://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>   | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
+| Test coverage |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>     |                  |
