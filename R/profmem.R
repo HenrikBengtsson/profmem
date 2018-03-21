@@ -59,7 +59,7 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
   ## Profile memory
   error <- NULL
   value <- tryCatch({
-    eval(expr, envir=envir)
+    eval(expr, envir=envir, enclos = baseenv())
   }, error = function(ex) {
     error <<- ex
     NULL

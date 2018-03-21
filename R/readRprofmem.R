@@ -63,7 +63,7 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L
     trace <- gsub('" "', '", "', trace, fixed=TRUE)
     trace <- sprintf("c(%s)", trace)
   
-    trace <- eval(parse(text=trace))
+    trace <- eval(parse(text=trace), enclos = baseenv())
     trace <- trace[seq_len(max(0L, length(trace)-drop))]
 
     list(what = what, bytes = bytes, trace = trace)
