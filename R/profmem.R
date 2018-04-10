@@ -95,7 +95,7 @@ profmem_begin <- function(threshold = getOption("profmem.threshold", 0L)) {
   }
 
   threshold <- as.integer(threshold)
-  stopifnot(length(threshold) == 1, is.finite(threshold), threshold >= 0L)
+  stop_if_not(length(threshold) == 1, is.finite(threshold), threshold >= 0L)
 
   depth <- profmem_stack("depth")
   if (depth > 0) {
@@ -248,7 +248,7 @@ profmem_stack <- local({
     
     ## Stack changing
     if (action == "push") {
-      stopifnot(inherits(data, "Rprofmem"),
+      stop_if_not(inherits(data, "Rprofmem"),
                 length(threshold) == 1, is.finite(threshold),
                 is.integer(threshold), threshold >= 0L)
       attr(data, "threshold") <- threshold
@@ -271,7 +271,7 @@ profmem_stack <- local({
     } else if (action == "append") {
       depth <- length(stack)
       if (depth == 0) stop("Cannot 'append' - profmem stack is empty")
-      stopifnot(inherits(data, "Rprofmem"),
+      stop_if_not(inherits(data, "Rprofmem"),
                 length(threshold) == 1, is.finite(threshold),
                 is.integer(threshold), threshold >= 0L)
       attr(data, "threshold") <- threshold

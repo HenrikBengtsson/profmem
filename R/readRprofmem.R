@@ -25,10 +25,10 @@
 #' @export
 #' @importFrom utils file_test
 readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...) {
-  stopifnot(file_test("-f", pathname))
+  stop_if_not(file_test("-f", pathname))
   as <- match.arg(as)
   drop <- as.integer(drop)
-  stopifnot(length(drop) == 1, drop >= 0)
+  stop_if_not(length(drop) == 1, drop >= 0)
 
   ## Read raw
   bfr <- readLines(pathname, warn=FALSE)
@@ -85,7 +85,7 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L
   class(res) <- c("Rprofmem", class(res))
 
   ## Sanity check
-  stopifnot(c("what", "bytes", "trace") %in% names(res))
+  stop_if_not(all(c("what", "bytes", "trace") %in% names(res)))
   
   res
 } ## readRprofmem()

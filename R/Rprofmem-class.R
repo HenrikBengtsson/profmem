@@ -25,27 +25,27 @@ c.Rprofmem <- function(...) {
   threshold <- NULL
   
   for (arg in args) {
-    stopifnot(inherits(arg, "Rprofmem"))
+    stop_if_not(inherits(arg, "Rprofmem"))
     what <- c(what, arg$what)
     bytes <- c(bytes, arg$bytes)
     trace <- c(trace, arg$trace)
     threshold <- c(threshold, attr(arg, "threshold"))
   }
   threshold <- max(threshold)
-  stopifnot(length(threshold) == 1, is.finite(threshold),
+  stop_if_not(length(threshold) == 1, is.finite(threshold),
             is.integer(threshold), threshold >= 0L)
   
   res <- data.frame(what = what, bytes = bytes, stringsAsFactors = FALSE)
   res$trace <- trace
   if (threshold > 0L) {
     keep <- is.na(bytes) | (bytes >= threshold)
-    stopifnot(all(is.finite(keep)))
+    stop_if_not(all(is.finite(keep)))
     res <- res[keep, ]
   }
   attr(res, "threshold") <- threshold
   class(res) <- c("Rprofmem", class(res))
   ## Sanity check
-  stopifnot(c("what", "bytes", "trace") %in% names(res))
+  stop_if_not(all(c("what", "bytes", "trace") %in% names(res)))
   
   res
 }
