@@ -52,7 +52,7 @@ c.Rprofmem <- function(...) {
 
 #' @export
 subset.Rprofmem <- function(x, ...) {
-  res <- NextMethod("subset")
+  res <- NextMethod()
   attr(res, "expression") <- attr(x, "expression")
   attr(res, "threshold") <- attr(x, "threshold")
   res
