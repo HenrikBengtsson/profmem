@@ -89,7 +89,7 @@ profile data (regardless whether memory profiling is active or not).
 This is intentional.
 
 If a profmem profiling is already active, \code{profmem()} and \code{profmem_begin()}
-performs an \emph{independent}, \emph{nested} profiling, which has no affect on the
+performs an \emph{independent}, \emph{nested} profiling, which does not affect the
 already active one.  When the active one completes, it will contain all
 memory events also collected by the nested profiling as if the nested one
 never occurred.

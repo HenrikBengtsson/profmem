@@ -76,6 +76,8 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
 } ## profmem()
 
 
+#' Memory profiling R
+#'
 #' `profmem_begin()` starts the memory profiling of all the following \R
 #' evaluations until `profmem_end()` is called.
 #'
