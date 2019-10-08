@@ -92,7 +92,7 @@ Unit: milliseconds
   bad 0.015 0.016 0.041  0.021 0.050 0.94   100   a
  good 0.010 0.011 0.029  0.012 0.033 0.80   100   a
 ```
-The ineffcient approach is 1.5-2 times slower than the efficient one.
+The inefficient approach is 1.5-2 times slower than the efficient one.
 
 
 The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.
@@ -138,14 +138,14 @@ For more information, please see the 'R Installation and Administration' documen
 ## Installation
 R package profmem is available on [CRAN](https://cran.r-project.org/package=profmem) and can be installed in R as:
 ```r
-install.packages('profmem')
+install.packages("profmem")
 ```
 
 ### Pre-release version
 
 To install the pre-release version that is available in Git branch `develop` on GitHub, use:
 ```r
-remotes::install_github('HenrikBengtsson/profmem@develop')
+remotes::install_github("HenrikBengtsson/profmem@develop")
 ```
 This will install the package from source.  
 
@@ -160,7 +160,7 @@ Contributing to this package is easy.  Just send a [pull request](https://help.g
 
 ## Software status
 
-| Resource:     | CRAN        | Travis CI       | Appveyor         |
+| Resource:     | CRAN        | Travis CI       | AppVeyor         |
 | ------------- | ------------------- | --------------- | ---------------- |
 | _Platforms:_  | _Multiple_          | _Linux & macOS_ | _Windows_        |
 | R CMD check   | <a href="https://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>   | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
