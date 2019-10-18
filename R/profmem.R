@@ -10,8 +10,24 @@
 #' 
 #' @param threshold The smallest memory allocation (in bytes) to log.
 #'
-#' @return `profmem()` and `profmem_end()` returns the collected
-#' `Rprofmem` data.
+#' @return `profmem()` and `profmem_end()` returns the collected allocation
+#' data as an `Rprofmem` data.frame with additional attributes set.
+#' An `Rprofmem` data.frame has columns `what`, `bytes`, and `trace`, with:
+#'
+#'  * `what`:  (character) type of memory event;
+#'             either `"alloc"` or `"new page"`
+#'  * `bytes`: (numeric) number of bytes allocated or `NA_real_`
+#'             (when `what` is `"new page"`)
+#'  * `trace`: (list of character vectors) zero or more function names
+#'
+#' The attributes set are:
+#'
+#'  * `threshold` : The threshold used (= argument `threshold`)
+#'  * `expression`: The expression profiled (= argument `expr`)
+#'  * `value`     : The value of the evaluated expression
+#'                  (only set if there was no error)
+#'  * `error`     : The error object in case the evaluation failed
+#'                  (only set if there was an error)
 #'
 #' @details
 #' In order for memory profiling to work, \R must have been _built_ with memory

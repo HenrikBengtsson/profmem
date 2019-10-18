@@ -17,7 +17,16 @@
 #' 
 #' @param ... Not used
 #'
-#' @return An `Rprofmem` data.frame (or a character vector)
+#' @return An `Rprofmem` data.frame or a character vector (if `as` is `"raw"`
+#' or `"fixed"`).
+#' An `Rprofmem` data.frame has columns `what`, `bytes`, and `trace`, with:
+#'
+#'  * `what`:  (character) type of memory event;
+#'             either `"alloc"` or `"new page"`
+#'  * `bytes`: (numeric) number of bytes allocated or `NA_real_`
+#'             (when `what` is `"new page"`)
+#'  * `trace`: (list of character vectors) zero or more function names
+#'
 #'
 #' @references
 #' Ref. 1: \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}

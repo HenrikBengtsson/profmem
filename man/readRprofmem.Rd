@@ -23,7 +23,16 @@ parsed into bytes and call stack information.}
 \item{...}{Not used}
 }
 \value{
-An \code{Rprofmem} data.frame (or a character vector)
+An \code{Rprofmem} data.frame or a character vector (if \code{as} is \code{"raw"}
+or \code{"fixed"}).
+An \code{Rprofmem} data.frame has columns \code{what}, \code{bytes}, and \code{trace}, with:
+\itemize{
+\item \code{what}:  (character) type of memory event;
+either \code{"alloc"} or \code{"new page"}
+\item \code{bytes}: (numeric) number of bytes allocated or \code{NA_real_}
+(when \code{what} is \code{"new page"})
+\item \code{trace}: (list of character vectors) zero or more function names
+}
 }
 \description{
 Reads and parses an Rprofmem log file that was created by
