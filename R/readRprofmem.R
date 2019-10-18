@@ -80,7 +80,7 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L
 
   if (length(res) == 0) {
     what <- character(0L)
-    bytes <- integer(0L)
+    bytes <- numeric(0L)
     traces <- list()
   } else {
     what <- unlist(lapply(res, FUN=function(x) x$what), use.names=FALSE)

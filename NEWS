@@ -7,6 +7,12 @@ DOCUMENTATION:
 
  o Added documentation on what an 'Rprofmem' data.frame contains.
 
+CONSISTENCY:
+
+ o The 'bytes' column returned by readRprofmem() would be of type integer when
+   zero allocation events where read, whereas otherwise it would be of type
+   numeric.
+   
 
 Version: 0.5.0 [2018-01-30]
 
