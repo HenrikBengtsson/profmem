@@ -10,8 +10,12 @@
 \alias{profmem_depth}
 \title{Memory profiling R}
 \usage{
-profmem(expr, envir = parent.frame(), substitute = TRUE,
-  threshold = getOption("profmem.threshold", 0L))
+profmem(
+  expr,
+  envir = parent.frame(),
+  substitute = TRUE,
+  threshold = getOption("profmem.threshold", 0L)
+)
 
 profmem_begin(threshold = getOption("profmem.threshold", 0L))
 

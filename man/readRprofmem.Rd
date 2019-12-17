@@ -4,8 +4,7 @@
 \alias{readRprofmem}
 \title{Read an Rprofmem log file}
 \usage{
-readRprofmem(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L,
-  ...)
+readRprofmem(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...)
 }
 \arguments{
 \item{pathname}{The Rprofmem log file to be read.}

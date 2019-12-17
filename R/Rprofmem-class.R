@@ -80,7 +80,7 @@ as.data.frame.Rprofmem <- function(x, ...) {
 
 
 #' @export
-print.Rprofmem <- function(x, expr = TRUE, newpage = FALSE, ...) {
+print.Rprofmem <- function(x, expr = getOption("profmem.print.expr", TRUE), newpage = getOption("profmem.print.newpage", FALSE), ...) {
   if (expr && "expression" %in% names(attributes(x))) {
     cat("Rprofmem memory profiling of:\n")
     print(attr(x, "expression"))
