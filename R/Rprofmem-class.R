@@ -94,7 +94,7 @@ print.Rprofmem <- function(x, expr = getOption("profmem.print.expr", TRUE), newp
     cat(sprintf("Memory allocations (>= %g bytes):\n", threshold))
   }
 
-  data <- as.data.frame(x, ...)
+  data <- as.data.frame(x, ..., stringsAsFactors = FALSE)
   
   if (!newpage) {
     drop <- which(x$what == "new page")
