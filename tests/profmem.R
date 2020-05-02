@@ -18,7 +18,7 @@ if (capabilities("profmem")) {
   })
   print(p)
 
-  data <- as.data.frame(p)
+  data <- as.data.frame(p, stringsAsFactors = FALSE)
   print(data)
 
   t <- total(p)
@@ -43,14 +43,14 @@ if (capabilities("profmem")) {
     A <- matrix(rnorm(100^2), ncol=100)
     B <- foo(100)
   }, threshold = 40000)
-  d <- as.data.frame(p)
+  d <- as.data.frame(p, stringsAsFactors = FALSE)
   print(d)
 
   p1 <- subset(p, !is.na(bytes))
-  d1 <- as.data.frame(p1)
+  d1 <- as.data.frame(p1, stringsAsFactors = FALSE)
   
   p2 <- subset(p, bytes >= 40000)
-  d2 <- as.data.frame(p2)
+  d2 <- as.data.frame(p2, stringsAsFactors = FALSE)
   print(d2)
   stopifnot(identical(d2, d1))
 
