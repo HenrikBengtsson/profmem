@@ -37,6 +37,17 @@ either \code{"alloc"} or \code{"new page"}
 Reads and parses an Rprofmem log file that was created by
 \code{\link[utils:Rprofmem]{utils::Rprofmem()}}.
 }
+\examples{
+file <- system.file("extdata", "example.Rprofmem.out", package = "profmem")
+
+raw <- readRprofmem(file, as = "raw")
+cat(sprintf("*** \%s (raw):\n", basename(file)))
+cat(raw, sep = "\n")
+
+profmem <- readRprofmem(file, as = "Rprofmem")
+cat(sprintf("\n*** \%s (Rprofmem):\n", basename(file)))
+print(profmem)
+}
 \references{
 Ref. 1: \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
 }

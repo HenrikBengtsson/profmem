@@ -1,7 +1,7 @@
 Package: profmem
 ================
 
-Version: 0.5.0-9000 [2020-05-02]
+Version: 0.5.0-9000 [2020-09-07]
 
 NEW FEATURES:
 
@@ -11,6 +11,8 @@ NEW FEATURES:
 DOCUMENTATION:
 
  * Added documentation on what an 'Rprofmem' data.frame contains.
+
+ * Added example for readRprofmem().
 
 CONSISTENCY:
 

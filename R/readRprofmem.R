@@ -27,6 +27,7 @@
 #'             (when `what` is `"new page"`)
 #'  * `trace`: (list of character vectors) zero or more function names
 #'
+#' @example incl/readRprofmem.R
 #'
 #' @references
 #' Ref. 1: \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
