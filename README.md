@@ -91,8 +91,8 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 > stats
 Unit: milliseconds
  expr   min    lq  mean median    uq   max neval
-  bad 0.025 0.025 0.028  0.026 0.027 0.095   100
- good 0.012 0.012 0.014  0.014 0.014 0.029   100
+  bad 0.022 0.023 0.025  0.024 0.024 0.072   100
+ good 0.010 0.011 0.013  0.013 0.014 0.022   100
 ```
 The inefficient approach is 1.5-2 times slower than the efficient one.
 
@@ -166,5 +166,5 @@ We abide to the [Code of Conduct](https://www.contributor-covenant.org/version/2
 | Resource      | CRAN        | GitHub Actions      | Travis CI       | AppVeyor CI      |
 | ------------- | ------------------- | ------------------- | --------------- | ---------------- |
 | _Platforms:_  | _Multiple_          | _Multiple_          | _Linux & macOS_ | _Windows_        |
-| R CMD check   | <a href="https://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> |        | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>   | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
+| R CMD check   | <a href="https://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://github.com/HenrikBengtsson/profmem/actions?query=workflow%3AR-CMD-check"><img src="https://github.com/HenrikBengtsson/profmem/workflows/R-CMD-check/badge.svg?branch=develop" alt="Build status"></a>       | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>   | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
 | Test coverage |                     |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>     |                  |
