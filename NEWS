@@ -21,6 +21,7 @@ CONSISTENCY:
  * print(x) for Rprofmem now uses an explicit stringsAsFactors=FALSE when
    internally coercing 'x' to a data frame.
 
+
 Version: 0.5.0 [2018-01-30]
 
 SIGNIFICANT CHANGES:

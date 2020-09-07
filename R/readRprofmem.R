@@ -8,8 +8,8 @@
 #' @param as Specifies in what format data should be returned.
 #' If `"raw"`, the line content of the file is returned as is
 #' (as a character vector).
-#' If `"fixed"`, as `"raw"` but with missing newlines
-#' added to lines with empty stack calls (see Ref. 1).
+#' If `"fixed"`, as `"raw"` but with missing newlines added to lines with empty
+#' stack calls that may be introduced in R (< 3.5.0) (see Ref. 1).
 #' If `"Rprofmem"`, the collected Rprofmem data is fully
 #' parsed into bytes and call stack information.
 #' 

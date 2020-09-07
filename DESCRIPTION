@@ -15,5 +15,5 @@ License: LGPL (>= 2.1)
 LazyLoad: TRUE
 URL: https://github.com/HenrikBengtsson/profmem
 BugReports: https://github.com/HenrikBengtsson/profmem/issues
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
