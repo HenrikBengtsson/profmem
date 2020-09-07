@@ -4,7 +4,7 @@ message("readRprofmem() ...")
 
 message(" - corrupt file")
 
-broken <- system.file("extdata", "broken.Rprofile.out", package = "profmem")
+broken <- system.file("extdata", "broken.Rprofmem.out", package = "profmem")
 
 bfr <- readLines(broken)
 cat("readLines(broken):\n")
