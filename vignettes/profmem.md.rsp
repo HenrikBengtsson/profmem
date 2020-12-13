@@ -23,7 +23,7 @@ oopts <- options(
 set.seed(0xBEEF) ## Just to minimize diff when rebuilt
 
 ## WORKAROUND: Avoid spurious memory allocations that occurs
-## occassional when running in a fresh R session
+## occasional when running in a fresh R session
 options(profmem.threshold = 1000)
 
 ## Initiate the random number generator, because otherwise it will
