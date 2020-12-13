@@ -7,3 +7,7 @@ vignettes/future-1-overview.md.rsp: inst/vignettes-static/future-1-overview.md.r
 	$(MAKE) README.md
 
 vigs: vignettes/future-1-overview.md.rsp
+
+spelling:
+	$(R_SCRIPT) -e "spelling::spell_check_package()"
+	$(R_SCRIPT) -e "spelling::spell_check_files(c('NEWS', dir('vignettes', pattern='[.](md|rsp)$$', full.names=TRUE)), ignore=readLines('inst/WORDLIST', warn=FALSE))"
