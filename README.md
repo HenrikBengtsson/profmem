@@ -90,9 +90,9 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 + }, times = 100, unit = "ms")
 > stats
 Unit: milliseconds
- expr   min    lq  mean median    uq   max neval
-  bad 0.022 0.023 0.025  0.024 0.024 0.072   100
- good 0.010 0.011 0.013  0.013 0.014 0.022   100
+ expr    min    lq  mean median    uq   max neval
+  bad 0.0268 0.028 0.029  0.029 0.029 0.060   100
+ good 0.0095 0.010 0.012  0.011 0.014 0.038   100
 ```
 The inefficient approach is 1.5-2 times slower than the efficient one.
 

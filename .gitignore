@@ -14,3 +14,10 @@
 *.swp
 .covr.rds
 .future
+.ghi
+.issues
+.make
+.local
+revdep/data.sqlite
+revdep/checks/*
+revdep/library/*
