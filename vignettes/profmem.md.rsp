@@ -23,7 +23,7 @@ oopts <- options(
 set.seed(0xBEEF) ## Just to minimize diff when rebuilt
 
 ## WORKAROUND: Avoid spurious memory allocations that occurs
-## occassional when running in a fresh R session
+## occasional when running in a fresh R session
 options(profmem.threshold = 1000)
 
 ## Initiate the random number generator, because otherwise it will
@@ -124,7 +124,7 @@ stats <- microbenchmark(
 stats
 })%>
 ```
-The ineffcient approach is 1.5-2 times slower than the efficient one.
+The inefficient approach is 1.5-2 times slower than the efficient one.
 
 
 The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.

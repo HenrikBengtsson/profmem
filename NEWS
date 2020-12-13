@@ -1,90 +1,113 @@
 Package: profmem
 ================
 
+Version: 0.6.0 [2020-12-13]
+
+NEW FEATURES:
+
+ * The defaults of arguments 'expr' and 'newpage' of print() for Rprofmem can
+   now be set via options 'profmem.print.expr' and 'profmem.print.newpage'.
+
+DOCUMENTATION:
+
+ * Added documentation on what an 'Rprofmem' data.frame contains.
+
+ * Added example for readRprofmem().
+
+CONSISTENCY:
+
+ * The 'bytes' column returned by readRprofmem() would be of type integer when
+   zero allocation events where read, whereas otherwise it would be of type
+   numeric.
+
+ * print(x) for Rprofmem now uses an explicit stringsAsFactors=FALSE when
+   internally coercing 'x' to a data frame.
+
+
 Version: 0.5.0 [2018-01-30]
 
 SIGNIFICANT CHANGES:
 
- o Nested profmem() calls are now supported, such that inner profmem() calls
+ * Nested profmem() calls are now supported, such that inner profmem() calls
    will not affect outer ones.  This allows, for instance, a package to use
    profmem internally without having to worry about profmem already being
    active when its functions are called.
 
 NEW FEATURES:
  
- o Added profmem_begin() and profmem_end() as an alternative to profmem().
+ * Added profmem_begin() and profmem_end() as an alternative to profmem().
 
- o Added profmem_suspend() and profmem_resume() for suspending and resuming
+ * Added profmem_suspend() and profmem_resume() for suspending and resuming
    an active profmem session.
 
- o Added profmem_status() for checking whether profmem is inactive, active, or
+ * Added profmem_status() for checking whether profmem is inactive, active, or
    suspended.
    
- o Added profmem_depth() to get the current depth of nested profmem sessions. 
+ * Added profmem_depth() to get the current depth of nested profmem sessions. 
 
- o print() for Rprofmem now reports on the threshold used, if known.
+ * print() for Rprofmem now reports on the threshold used, if known.
 
- o print() for Rprofmem gained arguments 'expr = TRUE' and 'newpage = FALSE',
+ * print() for Rprofmem gained arguments 'expr = TRUE' and 'newpage = FALSE',
    controlling whether the profiled R expression and 'new page' entries should
    be displayed or not.
 
- o Added option 'future.threshold' for controlling the default threshold level
+ * Added option 'profmem.threshold' for controlling the default threshold level
    for profmem() and profmem_begin().
 
 DOCUMENTATION:
 
- o VIGNETTE: Updated the example in Section 'An example where memory profiling
+ * VIGNETTE: Updated the example in Section 'An example where memory profiling
    can make a difference' due to improvements in R (>= 3.4.0), which made the
    previous example no longer valid.
 
- o help("profmem") how provide much more details previously only available
+ * help("profmem") how provide much more details previously only available
    in the vignette.
 
 BUG FIX:
 
- o readRprofmem() failed to "workaround" another buggy Rprofmem() output.
+ * readRprofmem() failed to "workaround" another buggy Rprofmem() output.
    
  
 Version: 0.4.0 [2016-09-14]
 
 NEW FEATURES:
 
- o profmem() now returns a data.frame of class Rprofmem.
+ * profmem() now returns a data.frame of class Rprofmem.
  
- o profmem() gained argument threshold.
+ * profmem() gained argument threshold.
 
 CODE QUALITY:
 
- o 100% test coverage.
+ * 100% test coverage.
  
  
 Version: 0.3.0 [2016-08-06]
 
 DOCUMENTATION:
 
- o Added vignette.
+ * Added vignette.
  
  
 Version: 0.2.1 [2016-07-11]
 
 NEW FEATURES:
 
- o Added readRprofmem().
+ * Added readRprofmem().
  
  
 Version: 0.2.0 [2016-06-05]
 
 NEW FEATURES:
 
- o Added total() to get the total number of bytes allocated.
+ * Added total() to get the total number of bytes allocated.
  
- o profmem() returns also when evaluating the expression gives an error.
+ * profmem() returns also when evaluating the expression gives an error.
  
  
 Version: 0.1.0 [2016-06-04]
 
 SIGNIFICANT CHANGES:
 
- o Added profmem().
+ * Added profmem().
  
- o Package created.
+ * Package created.

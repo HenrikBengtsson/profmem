@@ -8,8 +8,8 @@
 #' @param as Specifies in what format data should be returned.
 #' If `"raw"`, the line content of the file is returned as is
 #' (as a character vector).
-#' If `"fixed"`, as `"raw"` but with missing newlines
-#' added to lines with empty stack calls (see Ref. 1).
+#' If `"fixed"`, as `"raw"` but with missing newlines added to lines with empty
+#' stack calls that may be introduced in R (< 3.5.0) (see Ref. 1).
 #' If `"Rprofmem"`, the collected Rprofmem data is fully
 #' parsed into bytes and call stack information.
 #' 
@@ -17,7 +17,17 @@
 #' 
 #' @param ... Not used
 #'
-#' @return An `Rprofmem` data.frame (or a character vector)
+#' @return An `Rprofmem` data.frame or a character vector (if `as` is `"raw"`
+#' or `"fixed"`).
+#' An `Rprofmem` data.frame has columns `what`, `bytes`, and `trace`, with:
+#'
+#'  * `what`:  (character) type of memory event;
+#'             either `"alloc"` or `"new page"`
+#'  * `bytes`: (numeric) number of bytes allocated or `NA_real_`
+#'             (when `what` is `"new page"`)
+#'  * `trace`: (list of character vectors) zero or more function names
+#'
+#' @example incl/readRprofmem.R
 #'
 #' @references
 #' Ref. 1: \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}
@@ -25,10 +35,10 @@
 #' @export
 #' @importFrom utils file_test
 readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...) {
-  stopifnot(file_test("-f", pathname))
+  stop_if_not(file_test("-f", pathname))
   as <- match.arg(as)
   drop <- as.integer(drop)
-  stopifnot(length(drop) == 1, drop >= 0)
+  stop_if_not(length(drop) == 1, drop >= 0)
 
   ## Read raw
   bfr <- readLines(pathname, warn=FALSE)
@@ -63,7 +73,7 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L
     trace <- gsub('" "', '", "', trace, fixed=TRUE)
     trace <- sprintf("c(%s)", trace)
   
-    trace <- eval(parse(text=trace))
+    trace <- eval(parse(text=trace), enclos = baseenv())
     trace <- trace[seq_len(max(0L, length(trace)-drop))]
 
     list(what = what, bytes = bytes, trace = trace)
@@ -71,7 +81,7 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L
 
   if (length(res) == 0) {
     what <- character(0L)
-    bytes <- integer(0L)
+    bytes <- numeric(0L)
     traces <- list()
   } else {
     what <- unlist(lapply(res, FUN=function(x) x$what), use.names=FALSE)
@@ -85,7 +95,7 @@ readRprofmem <- function(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L
   class(res) <- c("Rprofmem", class(res))
 
   ## Sanity check
-  stopifnot(c("what", "bytes", "trace") %in% names(res))
+  stop_if_not(all(c("what", "bytes", "trace") %in% names(res)))
   
   res
 } ## readRprofmem()

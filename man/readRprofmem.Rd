@@ -12,8 +12,8 @@ readRprofmem(pathname, as = c("Rprofmem", "fixed", "raw"), drop = 0L, ...)
 \item{as}{Specifies in what format data should be returned.
 If \code{"raw"}, the line content of the file is returned as is
 (as a character vector).
-If \code{"fixed"}, as \code{"raw"} but with missing newlines
-added to lines with empty stack calls (see Ref. 1).
+If \code{"fixed"}, as \code{"raw"} but with missing newlines added to lines with empty
+stack calls that may be introduced in R (< 3.5.0) (see Ref. 1).
 If \code{"Rprofmem"}, the collected Rprofmem data is fully
 parsed into bytes and call stack information.}
 
@@ -22,11 +22,29 @@ parsed into bytes and call stack information.}
 \item{...}{Not used}
 }
 \value{
-An \code{Rprofmem} data.frame (or a character vector)
+An \code{Rprofmem} data.frame or a character vector (if \code{as} is \code{"raw"}
+or \code{"fixed"}).
+An \code{Rprofmem} data.frame has columns \code{what}, \code{bytes}, and \code{trace}, with:
+\itemize{
+\item \code{what}:  (character) type of memory event;
+either \code{"alloc"} or \code{"new page"}
+\item \code{bytes}: (numeric) number of bytes allocated or \code{NA_real_}
+(when \code{what} is \code{"new page"})
+\item \code{trace}: (list of character vectors) zero or more function names
+}
 }
 \description{
 Reads and parses an Rprofmem log file that was created by
 \code{\link[utils:Rprofmem]{utils::Rprofmem()}}.
+}
+\examples{
+file <- system.file("extdata", "example.Rprofmem.out", package = "profmem")
+
+raw <- readRprofmem(file, as = "raw")
+cat(raw, sep = "\n")
+
+profmem <- readRprofmem(file, as = "Rprofmem")
+print(profmem)
 }
 \references{
 Ref. 1: \url{https://github.com/HenrikBengtsson/Wishlist-for-R/issues/25}

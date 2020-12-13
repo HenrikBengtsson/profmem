@@ -10,8 +10,24 @@
 #' 
 #' @param threshold The smallest memory allocation (in bytes) to log.
 #'
-#' @return `profmem()` and `profmem_end()` returns the collected
-#' `Rprofmem` data.
+#' @return `profmem()` and `profmem_end()` returns the collected allocation
+#' data as an `Rprofmem` data.frame with additional attributes set.
+#' An `Rprofmem` data.frame has columns `what`, `bytes`, and `trace`, with:
+#'
+#'  * `what`:  (character) type of memory event;
+#'             either `"alloc"` or `"new page"`
+#'  * `bytes`: (numeric) number of bytes allocated or `NA_real_`
+#'             (when `what` is `"new page"`)
+#'  * `trace`: (list of character vectors) zero or more function names
+#'
+#' The attributes set are:
+#'
+#'  * `threshold` : The threshold used (= argument `threshold`)
+#'  * `expression`: The expression profiled (= argument `expr`)
+#'  * `value`     : The value of the evaluated expression
+#'                  (only set if there was no error)
+#'  * `error`     : The error object in case the evaluation failed
+#'                  (only set if there was an error)
 #'
 #' @details
 #' In order for memory profiling to work, \R must have been _built_ with memory
@@ -37,7 +53,7 @@
 #' This is intentional.
 #'
 #' If a profmem profiling is already active, `profmem()` and `profmem_begin()`
-#' performs an _independent_, _nested_ profiling, which has no affect on the
+#' performs an _independent_, _nested_ profiling, which does not affect the
 #' already active one.  When the active one completes, it will contain all
 #' memory events also collected by the nested profiling as if the nested one
 #' never occurred.
@@ -59,7 +75,7 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
   ## Profile memory
   error <- NULL
   value <- tryCatch({
-    eval(expr, envir=envir)
+    eval(expr, envir=envir, enclos = baseenv())
   }, error = function(ex) {
     error <<- ex
     NULL
@@ -76,6 +92,8 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
 } ## profmem()
 
 
+#' Memory profiling R
+#'
 #' `profmem_begin()` starts the memory profiling of all the following \R
 #' evaluations until `profmem_end()` is called.
 #'
@@ -95,7 +113,7 @@ profmem_begin <- function(threshold = getOption("profmem.threshold", 0L)) {
   }
 
   threshold <- as.integer(threshold)
-  stopifnot(length(threshold) == 1, is.finite(threshold), threshold >= 0L)
+  stop_if_not(length(threshold) == 1, is.finite(threshold), threshold >= 0L)
 
   depth <- profmem_stack("depth")
   if (depth > 0) {
@@ -248,7 +266,7 @@ profmem_stack <- local({
     
     ## Stack changing
     if (action == "push") {
-      stopifnot(inherits(data, "Rprofmem"),
+      stop_if_not(inherits(data, "Rprofmem"),
                 length(threshold) == 1, is.finite(threshold),
                 is.integer(threshold), threshold >= 0L)
       attr(data, "threshold") <- threshold
@@ -271,7 +289,7 @@ profmem_stack <- local({
     } else if (action == "append") {
       depth <- length(stack)
       if (depth == 0) stop("Cannot 'append' - profmem stack is empty")
-      stopifnot(inherits(data, "Rprofmem"),
+      stop_if_not(inherits(data, "Rprofmem"),
                 length(threshold) == 1, is.finite(threshold),
                 is.integer(threshold), threshold >= 0L)
       attr(data, "threshold") <- threshold

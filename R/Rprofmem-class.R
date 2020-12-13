@@ -25,34 +25,34 @@ c.Rprofmem <- function(...) {
   threshold <- NULL
   
   for (arg in args) {
-    stopifnot(inherits(arg, "Rprofmem"))
+    stop_if_not(inherits(arg, "Rprofmem"))
     what <- c(what, arg$what)
     bytes <- c(bytes, arg$bytes)
     trace <- c(trace, arg$trace)
     threshold <- c(threshold, attr(arg, "threshold"))
   }
   threshold <- max(threshold)
-  stopifnot(length(threshold) == 1, is.finite(threshold),
+  stop_if_not(length(threshold) == 1, is.finite(threshold),
             is.integer(threshold), threshold >= 0L)
   
   res <- data.frame(what = what, bytes = bytes, stringsAsFactors = FALSE)
   res$trace <- trace
   if (threshold > 0L) {
     keep <- is.na(bytes) | (bytes >= threshold)
-    stopifnot(all(is.finite(keep)))
+    stop_if_not(all(is.finite(keep)))
     res <- res[keep, ]
   }
   attr(res, "threshold") <- threshold
   class(res) <- c("Rprofmem", class(res))
   ## Sanity check
-  stopifnot(c("what", "bytes", "trace") %in% names(res))
+  stop_if_not(all(c("what", "bytes", "trace") %in% names(res)))
   
   res
 }
 
 #' @export
 subset.Rprofmem <- function(x, ...) {
-  res <- NextMethod("subset")
+  res <- NextMethod()
   attr(res, "expression") <- attr(x, "expression")
   attr(res, "threshold") <- attr(x, "threshold")
   res
@@ -80,7 +80,7 @@ as.data.frame.Rprofmem <- function(x, ...) {
 
 
 #' @export
-print.Rprofmem <- function(x, expr = TRUE, newpage = FALSE, ...) {
+print.Rprofmem <- function(x, expr = getOption("profmem.print.expr", TRUE), newpage = getOption("profmem.print.newpage", FALSE), ...) {
   if (expr && "expression" %in% names(attributes(x))) {
     cat("Rprofmem memory profiling of:\n")
     print(attr(x, "expression"))
@@ -94,7 +94,7 @@ print.Rprofmem <- function(x, expr = TRUE, newpage = FALSE, ...) {
     cat(sprintf("Memory allocations (>= %g bytes):\n", threshold))
   }
 
-  data <- as.data.frame(x, ...)
+  data <- as.data.frame(x, ..., stringsAsFactors = FALSE)
   
   if (!newpage) {
     drop <- which(x$what == "new page")

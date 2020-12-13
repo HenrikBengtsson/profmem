@@ -10,8 +10,12 @@
 \alias{profmem_depth}
 \title{Memory profiling R}
 \usage{
-profmem(expr, envir = parent.frame(), substitute = TRUE,
-  threshold = getOption("profmem.threshold", 0L))
+profmem(
+  expr,
+  envir = parent.frame(),
+  substitute = TRUE,
+  threshold = getOption("profmem.threshold", 0L)
+)
 
 profmem_begin(threshold = getOption("profmem.threshold", 0L))
 
@@ -35,8 +39,26 @@ profmem_depth()
 \item{threshold}{The smallest memory allocation (in bytes) to log.}
 }
 \value{
-\code{profmem()} and \code{profmem_end()} returns the collected
-\code{Rprofmem} data.
+\code{profmem()} and \code{profmem_end()} returns the collected allocation
+data as an \code{Rprofmem} data.frame with additional attributes set.
+An \code{Rprofmem} data.frame has columns \code{what}, \code{bytes}, and \code{trace}, with:
+\itemize{
+\item \code{what}:  (character) type of memory event;
+either \code{"alloc"} or \code{"new page"}
+\item \code{bytes}: (numeric) number of bytes allocated or \code{NA_real_}
+(when \code{what} is \code{"new page"})
+\item \code{trace}: (list of character vectors) zero or more function names
+}
+
+The attributes set are:
+\itemize{
+\item \code{threshold} : The threshold used (= argument \code{threshold})
+\item \code{expression}: The expression profiled (= argument \code{expr})
+\item \code{value}     : The value of the evaluated expression
+(only set if there was no error)
+\item \code{error}     : The error object in case the evaluation failed
+(only set if there was an error)
+}
 
 \code{profmem_begin()} returns (invisibly) the number of nested profmem
 session currently active.
@@ -53,17 +75,6 @@ or \code{"suspended"}.
 
 \code{profmem_begin()} starts the memory profiling of all the following \R
 evaluations until \code{profmem_end()} is called.
-
-\code{profmem_suspend()} suspends an active profiling until resumed by
-\code{profmem_resume()} or ended by \code{profmem_end()}.
-Calling \code{profmem_begin()} or \code{profmem()} will resume any suspended
-profiling. \emph{Nested} resuming and suspending is \emph{not} supported;
-it is a global state.
-
-\code{profmem_status()} checks whether there is an active profmem session
-or not, and whether it is suspended or not.
-
-\code{profmem_depth()} gets the number of nested / stacked profmem sessions.
 }
 \details{
 In order for memory profiling to work, \R must have been \emph{built} with memory
@@ -89,7 +100,7 @@ profile data (regardless whether memory profiling is active or not).
 This is intentional.
 
 If a profmem profiling is already active, \code{profmem()} and \code{profmem_begin()}
-performs an \emph{independent}, \emph{nested} profiling, which has no affect on the
+performs an \emph{independent}, \emph{nested} profiling, which does not affect the
 already active one.  When the active one completes, it will contain all
 memory events also collected by the nested profiling as if the nested one
 never occurred.
