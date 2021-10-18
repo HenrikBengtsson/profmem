@@ -10,6 +10,10 @@
 #' 
 #' @param threshold The smallest memory allocation (in bytes) to log.
 #'
+#' @param on_error (character) Controls whether evaluation errors should
+#' signal an error (`"error"`), a warning (`"warning"), or be ignored
+#' (`"ignore"`; default).
+#'
 #' @return `profmem()` and `profmem_end()` returns the collected allocation
 #' data as an `Rprofmem` data.frame with additional attributes set.
 #' An `Rprofmem` data.frame has columns `what`, `bytes`, and `trace`, with:
@@ -67,11 +71,12 @@
 #'
 #' @export
 #' @importFrom utils Rprofmem
-profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold = getOption("profmem.threshold", 0L)) {
+profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold = getOption("profmem.threshold", 0L), on_error = c("ignore", "warning", "error")) {
   if (substitute) expr <- substitute(expr)
+  on_error <- match.arg(on_error, choices = c("ignore", "warning", "error"))
 
   profmem_begin(threshold = threshold)
-  
+
   ## Profile memory
   error <- NULL
   value <- tryCatch({
@@ -82,6 +87,12 @@ profmem <- function(expr, envir = parent.frame(), substitute = TRUE, threshold =
   })
 
   pm <-  profmem_end()
+
+  if (on_error != "ignore") {
+    action <- switch(on_error, error = stop, warning = warning)
+    action(paste("profmem::profmem() detected a run-time error:",
+           conditionMessage(error)))
+  }
 
   ## Annotate
   attr(pm, "expression") <- expr

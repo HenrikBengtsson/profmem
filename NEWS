@@ -1,9 +1,13 @@
 Package: profmem
 ================
 
-Version: 0.6.0-9000 [2020-12-13]
+Version: 0.6.0-9001 [2021-10-18]
 
- * ...
+NEW FEATURES:
+
+ * profmem() gained argument 'on_error' to control what should happen when
+   there is a run-time error during profiling.  Known actions are "error",
+   "warning", and "ignore" (default).
  
 
 Version: 0.6.0 [2020-12-13]
