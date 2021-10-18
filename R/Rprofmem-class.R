@@ -121,6 +121,12 @@ print.Rprofmem <- function(x, expr = getOption("profmem.print.expr", TRUE), newp
   rownames(data)[n+1] <- "total"
 
   print(data, ...)
-  
+
+  ## Any errors to report on?
+  error <- attr(x, "error")
+  if (!is.null(error)) {
+    cat(sprintf("\nNote, an error occurred while evaluating the expression: %s\n", conditionMessage(error)))
+  }
+
   invisible(x)
 } ## print()

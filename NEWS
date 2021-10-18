@@ -8,6 +8,9 @@ NEW FEATURES:
  * profmem() gained argument 'on_error' to control what should happen when
    there is a run-time error during profiling.  Known actions are "error",
    "warning", and "ignore" (default).
+
+ * print() for Rprofmem objects now report on any run-time errors that
+   occurred while profiling the R expression.
  
 
 Version: 0.6.0 [2020-12-13]
