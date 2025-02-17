@@ -12,6 +12,9 @@ NEW FEATURES:
  * print() for Rprofmem objects now report on any run-time errors that
    occurred while profiling the R expression.
  
+ * print() for Rprofmem objects gained logical argument 'calls' to
+   control whether calls ("traces") are outputted.
+   
 
 Version: 0.6.0 [2020-12-13]
 
