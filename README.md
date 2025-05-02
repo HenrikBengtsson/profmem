@@ -30,12 +30,11 @@ Memory allocations (>= 2000 bytes):
        what  bytes               calls
 1     alloc   4048           integer()
 2     alloc  80048 matrix() -> rnorm()
-3     alloc   2552 matrix() -> rnorm()
-4     alloc  80048            matrix()
-total       166696                    
+3     alloc  80048            matrix()
+total       164144                    
 ```
 From this, we find that 4048 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
-We also see that `rnorm()`, which is called via `matrix()`, allocates 80048 + 2552 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
+We also see that `rnorm()`, which is called via `matrix()`, allocates 80048 bytes, which reflects the 10000 double values each occupying 8 bytes.
 Finally, the following entry reflects the memory allocation of 80048 bytes done by `matrix()` itself.
 
 
@@ -93,9 +92,9 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 + }, times = 100, unit = "ms")
 > stats
 Unit: milliseconds
- expr    min    lq  mean median    uq   max neval
-  bad 0.0141 0.018 0.022  0.019 0.022 0.052   100
- good 0.0095 0.011 0.016  0.013 0.016 0.067   100
+ expr   min    lq  mean median    uq   max neval
+  bad 0.022 0.024 0.025  0.025 0.026 0.045   100
+ good 0.012 0.013 0.015  0.014 0.015 0.031   100
 ```
 The inefficient approach is 1.5-2 times slower than the efficient one.
 
