@@ -19,7 +19,7 @@ evaluations until profmem_end() is called."><!-- mathjax --><script src="https:/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">profmem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0-9005</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
       </span>
     </div>
 
@@ -191,23 +191,24 @@ calls <code><a href="https://rdrr.io/r/utils/Rprofmem.html" class="external-link
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Memory allocations:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Number of 'new page' entries not displayed: 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        what bytes                         calls</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     alloc  1048               eval() -&gt; raw()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2     alloc   280            eval() -&gt; matrix()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3     alloc   560            eval() -&gt; matrix()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     alloc   560            eval() -&gt; matrix()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5     alloc  1072            eval() -&gt; matrix()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6     alloc   848 eval() -&gt; matrix() -&gt; rnorm()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7     alloc   848            eval() -&gt; matrix()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8     alloc   536                    &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9     alloc  1656                    &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10    alloc  1656                    &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11    alloc  1072                    &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12    alloc   256                    &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13    alloc   456                    &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14    alloc   216                    &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15    alloc   256                    &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> total       11320                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7     alloc   848 eval() -&gt; matrix() -&gt; rnorm()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8     alloc   848            eval() -&gt; matrix()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9     alloc   528                    &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10    alloc  1648                    &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11    alloc  1648                    &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12    alloc  1072                    &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13    alloc   256                    &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14    alloc   456                    &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15    alloc   216                    &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16    alloc   256                    &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> total       11296                              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rprofmem memory profiling of:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     x &lt;- raw(1000)</span>
@@ -218,10 +219,10 @@ calls <code><a href="https://rdrr.io/r/utils/Rprofmem.html" class="external-link
 <span class="r-out co"><span class="r-pr">#&gt;</span>        what bytes              calls</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     alloc  1048    eval() -&gt; raw()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5     alloc  1072 eval() -&gt; matrix()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9     alloc  1656         &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10    alloc  1656         &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11    alloc  1072         &lt;internal&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> total        6504                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10    alloc  1648         &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11    alloc  1648         &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12    alloc  1072         &lt;internal&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> total        6488                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  raw [1:1000] 00 00 00 00 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  num [1:10, 1:10] -1.40004 0.25532 -2.43726 -0.00557 0.62155 ...</span>
 </code></pre></div>
