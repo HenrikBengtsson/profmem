@@ -1,7 +1,10 @@
 
 
+<div id="badges"><!-- pkgdown markup -->
+<a href="https://CRAN.R-project.org/web/checks/check_results_profmem.html"><img border="0" src="https://www.r-pkg.org/badges/version/profmem" alt="CRAN check status"/></a> <a href="https://github.com/HenrikBengtsson/profmem/actions?query=workflow%3AR-CMD-check"><img border="0" src="https://github.com/HenrikBengtsson/profmem/actions/workflows/R-CMD-check.yaml/badge.svg?branch=develop" alt="R CMD check status"/></a>     <a href="https://app.codecov.io/gh/HenrikBengtsson/profmem"><img border="0" src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a> 
+</div>
 
-# profmem: Simple Memory Profiling for R
+# profmem: Simple Memory Profiling for R 
 
 ## Introduction
 
@@ -27,12 +30,11 @@ Memory allocations (>= 2000 bytes):
        what  bytes               calls
 1     alloc   4048           integer()
 2     alloc  80048 matrix() -> rnorm()
-3     alloc   2552 matrix() -> rnorm()
-4     alloc  80048            matrix()
-total       166696                    
+3     alloc  80048            matrix()
+total       164144                    
 ```
 From this, we find that 4048 bytes are allocated for integer vector `x`, which is because each integer value occupies 4 bytes of memory.  The additional 40 bytes are due to the internal data structure used for each variable R.  The size of this allocation can also be confirmed by the value of `object.size(x)`.
-We also see that `rnorm()`, which is called via `matrix()`, allocates 80048 + 2552 bytes, where the first one reflects the 10000 double values each occupying 8 bytes.  The second one reflects some unknown allocation done internally by the native code that `rnorm()` uses.
+We also see that `rnorm()`, which is called via `matrix()`, allocates 80048 bytes, which reflects the 10000 double values each occupying 8 bytes.
 Finally, the following entry reflects the memory allocation of 80048 bytes done by `matrix()` itself.
 
 
@@ -90,17 +92,14 @@ Using the [microbenchmark] package, we can also quantify the extra overhead in p
 + }, times = 100, unit = "ms")
 > stats
 Unit: milliseconds
- expr    min    lq  mean median    uq   max neval
-  bad 0.0268 0.028 0.029  0.029 0.029 0.060   100
- good 0.0095 0.010 0.012  0.011 0.014 0.038   100
+ expr   min    lq  mean median    uq   max neval
+  bad 0.022 0.024 0.025  0.025 0.026 0.045   100
+ good 0.012 0.013 0.015  0.014 0.015 0.031   100
 ```
 The inefficient approach is 1.5-2 times slower than the efficient one.
 
 
 The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.
-
-The above illustrates the value of profiling your R code's memory usage and thanks to `profmem()` we can compare the amount of memory allocated of two alternative implementations.  Being able to write memory-efficient R code becomes particularly important when working with large data sets, where an inefficient implementation may even prevent us from performing an analysis because we end up running out of memory.  Moreover, each memory allocation will eventually have to be deallocated and in R this is done automatically by the garbage collector, which runs in the background and recovers any blocks of memory that are allocated but no longer in use.  Garbage collection takes time and therefore slows down the overall processing in R even further.
-
 
 
 
@@ -155,19 +154,10 @@ remotes::install_github("HenrikBengtsson/profmem", ref="develop")
 ```
 This will install the package from source.  
 
-## Contributions
-
-This Git repository uses the [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model (the [`git flow`](https://github.com/petervanderdoes/gitflow-avh) extension is useful for this).  The [`develop`](https://github.com/HenrikBengtsson/profmem/tree/develop) branch contains the latest contributions and other code that will appear in the next release, and the [`master`](https://github.com/HenrikBengtsson/profmem) branch contains the code of the latest release, which is exactly what is currently on [CRAN](https://cran.r-project.org/package=profmem).
-
-Contributing to this package is easy.  Just send a [pull request](https://help.github.com/articles/using-pull-requests/).  When you send your PR, make sure `develop` is the destination branch on the [profmem repository](https://github.com/HenrikBengtsson/profmem).  Your PR should pass `R CMD check --as-cran`, which will also be checked by <a href="https://travis-ci.org/HenrikBengtsson/profmem">Travis CI</a> and <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem">AppVeyor CI</a> when the PR is submitted.
-
-We abide to the [Code of Conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/) of Contributor Covenant.
+<!-- pkgdown-drop-below -->
 
 
-## Software status
+## Contributing
 
-| Resource      | CRAN        | GitHub Actions      | Travis CI       | AppVeyor CI      |
-| ------------- | ------------------- | ------------------- | --------------- | ---------------- |
-| _Platforms:_  | _Multiple_          | _Multiple_          | _Linux & macOS_ | _Windows_        |
-| R CMD check   | <a href="https://cran.r-project.org/web/checks/check_results_profmem.html"><img border="0" src="http://www.r-pkg.org/badges/version/profmem" alt="CRAN version"></a> | <a href="https://github.com/HenrikBengtsson/profmem/actions?query=workflow%3AR-CMD-check"><img src="https://github.com/HenrikBengtsson/profmem/workflows/R-CMD-check/badge.svg?branch=develop" alt="Build status"></a>       | <a href="https://travis-ci.org/HenrikBengtsson/profmem"><img src="https://travis-ci.org/HenrikBengtsson/profmem.svg" alt="Build status"></a>   | <a href="https://ci.appveyor.com/project/HenrikBengtsson/profmem"><img src="https://ci.appveyor.com/api/projects/status/github/HenrikBengtsson/profmem?svg=true" alt="Build status"></a> |
-| Test coverage |                     |                     | <a href="https://codecov.io/gh/HenrikBengtsson/profmem"><img src="https://codecov.io/gh/HenrikBengtsson/profmem/branch/develop/graph/badge.svg" alt="Coverage Status"/></a>     |                  |
+To contribute to this package, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+

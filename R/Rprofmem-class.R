@@ -80,7 +80,7 @@ as.data.frame.Rprofmem <- function(x, ...) {
 
 
 #' @export
-print.Rprofmem <- function(x, expr = getOption("profmem.print.expr", TRUE), newpage = getOption("profmem.print.newpage", FALSE), ...) {
+print.Rprofmem <- function(x, expr = getOption("profmem.print.expr", TRUE), newpage = getOption("profmem.print.newpage", FALSE), calls = getOption("profmem.print.calls", TRUE), ...) {
   if (expr && "expression" %in% names(attributes(x))) {
     cat("Rprofmem memory profiling of:\n")
     print(attr(x, "expression"))
@@ -120,7 +120,17 @@ print.Rprofmem <- function(x, expr = getOption("profmem.print.expr", TRUE), newp
   data <- rbind(data, list(what = "", bytes = total, calls = ""))
   rownames(data)[n+1] <- "total"
 
+  if (!calls) {
+    data$calls <- NULL
+  }
+
   print(data, ...)
-  
+
+  ## Any errors to report on?
+  error <- attr(x, "error")
+  if (!is.null(error)) {
+    cat(sprintf("\nNote, an error occurred while evaluating the expression: %s\n", conditionMessage(error)))
+  }
+
   invisible(x)
 } ## print()

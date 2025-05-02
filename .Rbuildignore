@@ -9,6 +9,7 @@ INSTALL[.]md
 OVERVIEW[.]md
 README[.]md
 CONDUCT[.]md
+CONTRIBUTING[.]md
 
 #----------------------------
 # devtools
@@ -52,3 +53,4 @@ Rplots.pdf$
 [.]future
 
 
+^docs/

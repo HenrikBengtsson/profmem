@@ -14,7 +14,8 @@ profmem(
   expr,
   envir = parent.frame(),
   substitute = TRUE,
-  threshold = getOption("profmem.threshold", 0L)
+  threshold = getOption("profmem.threshold", 0L),
+  on_error = c("ignore", "warning", "error")
 )
 
 profmem_begin(threshold = getOption("profmem.threshold", 0L))
@@ -37,6 +38,9 @@ profmem_depth()
 \item{substitute}{Should \code{expr} be \code{\link[base:substitute]{base::substitute()}}:d or not.}
 
 \item{threshold}{The smallest memory allocation (in bytes) to log.}
+
+\item{on_error}{(character) Controls whether evaluation errors should
+signal an error (\code{"error"}), a warning (\verb{"warning"), or be ignored (}"ignore"`; default).}
 }
 \value{
 \code{profmem()} and \code{profmem_end()} returns the collected allocation
